@@ -10,22 +10,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MultiBot
+namespace FoE.Farmer.Library.Windows
 {
     /// <summary>
-    /// Interakční logika pro MainWindow.xaml
+    /// Interakční logika pro DebugWindow.xaml
     /// </summary>
-    public partial class MainWindow
+    public partial class DebugWindow : Window
     {
-        public MainWindow()
+        public DebugWindow()
         {
             InitializeComponent();
-
-            var d = new FoE.Farmer.Library.Windows.MainPage(this);
-            MainFrame.Navigate(d);
         }
     }
 }
