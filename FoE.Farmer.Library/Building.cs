@@ -29,6 +29,12 @@ namespace FoE.Farmer.Library
             {
                 if (Type == BuildType.Decoration || Type == BuildType.Military) return false;
                 if (MinNextPickup > DateTime.Now) return false;
+
+                if (ProductionState == ProductionState.IsRunning && MinNextPickup < DateTime.Now)
+                {
+                    ProductionState = ProductionState.Finished;
+                }
+
                 switch (ProductionState)
                 {
                     case ProductionState.Construction:
@@ -41,6 +47,47 @@ namespace FoE.Farmer.Library
             }
         }
 
+        public Payload[] Pickup()
+        {
+            if (!CanPickup) return null;
+
+            if (Type == BuildType.Residential || Type == BuildType.MainBuilding)
+            {
+                ProductionState = ProductionState.IsRunning;
+
+                MinNextPickup = Helper.GenerateNextInterval(ProductionTime);
+                Manager.Log($"Pickup building ID {ID}");
+                return new[] { Payloads.CityProductionService.PickupProduction(new[] { this }) };
+            }
+            else if (Type == BuildType.Goods || Type == BuildType.Supplies)
+            {
+                var oldProdState = ProductionState;
+                ProductionState = ProductionState.IsRunning;
+
+                var interval = Type == BuildType.Goods ? (int)ForgeOfEmpires.Manager.UserIntervalGoods : (int)ForgeOfEmpires.Manager.UserIntervalSupplies;
+                MinNextPickup = Helper.GenerateNextInterval(interval, Type);
+                if (oldProdState == ProductionState.Idle)
+                {
+                    Manager.Log($"Building idle ID {ID} and start production");
+                    return new[]
+                    {
+                        Payloads.CityProductionService.StartProduction(this)
+                    };
+                }
+                else
+                {
+                    Manager.Log($"Pickup building ID {ID} and start production");
+                    return new[]
+                    {
+                        Payloads.CityProductionService.PickupProduction(new[] {this}),
+                        Payloads.CityProductionService.StartProduction(this)
+                    };
+                }
+            }
+
+            return null;
+        }
+
         public static Building LoadFromJSON(JObject j)
         {
             if (j["__class__"].ToString() != "CityMapEntity") throw new ArgumentException("Input object has not building");
@@ -48,12 +95,12 @@ namespace FoE.Farmer.Library
             var b = new Building();
             switch (j["type"].ToString())
             {
-                case "residential": b.Type = BuildType.Residential; break;
+                case "residential": b.Type = BuildType.Residential; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalResidental; break;
                 case "decoration": b.Type = BuildType.Decoration; break;
-                case "main_building": b.Type = BuildType.MainBuilding; break;
+                case "main_building": b.Type = BuildType.MainBuilding; b.Interval = (int)TimeIntervalSupplies.OneDay; break;
                 case "military": b.Type = BuildType.Military; break;
-                case "production": b.Type = BuildType.Supplies; break;
-                case "goods": b.Type = BuildType.Goods; break;
+                case "production": b.Type = BuildType.Supplies; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalSupplies; break;
+                case "goods": b.Type = BuildType.Goods; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalGoods; break;
                 default: return null;
             }
 
@@ -65,13 +112,16 @@ namespace FoE.Farmer.Library
             {
                 case "ProductionFinishedState":
                     b.ProductionState = ProductionState.Finished;
-                    b.MinNextPickup = DateTime.Now;
+                    b.MinNextPickup = DateTime.MinValue;
                     break;
                 case "ProducingState":
                     b.ProductionState = ProductionState.IsRunning;
                     b.MinNextPickup = Helper.GenerateNextInterval(j["state"]["next_state_transition_in"].ToObject<int>());
                     break;
-                case "IdleState": b.ProductionState = ProductionState.Idle; break;
+                case "IdleState":
+                    b.ProductionState = ProductionState.Idle;
+                    b.MinNextPickup = DateTime.MinValue;
+                    break;
                 case "ConstructionState": b.ProductionState = ProductionState.Construction; break;
                 case "UnconnectedState": b.ProductionState = ProductionState.Unconnected; break;
                 default:
@@ -79,7 +129,7 @@ namespace FoE.Farmer.Library
                     return null;
             }
 
-            if (b.Type == BuildType.Residential) b.ProductionTime = j["state"]["current_product"]["production_time"].ToObject<int>();
+            if (b.Type == BuildType.Residential || b.Type == BuildType.MainBuilding) b.ProductionTime = j["state"]["current_product"]["production_time"].ToObject<int>();
 
             return b;
         }
@@ -114,16 +164,16 @@ namespace FoE.Farmer.Library
         FourHours = 1,
         EightHours = 2,
         OneDay = 3,
-        TwoDay = 4
+        TwoDays = 4
     }
 
     public enum TimeIntervalSupplies
     {
         FiveMinutes = 1,
-        FiftenMinuts = 2,
+        FiftenMinutes = 2,
         OneHour = 3,
-        FourHour = 4,
-        EightHour = 5,
+        FourHours = 4,
+        EightHours = 5,
         OneDay = 6
     }
 }

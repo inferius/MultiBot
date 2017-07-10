@@ -26,7 +26,7 @@ function FoELogin() {
 function FoEPlay() {
     if (document.querySelector("#sidebar .widget.login_glps") != null) {
         document.querySelector("#sidebar .widget.login_glps").contentDocument.querySelector("#login_userid").value = FoELoginUserName;
-        document.querySelector("#sidebar .widget.login_glps").contentDocument.querySelector("#login_password").value = FoELoginUserName;
+        document.querySelector("#sidebar .widget.login_glps").contentDocument.querySelector("#login_password").value = FoELoginPassword;
         document.querySelector("#sidebar .widget.login_glps").contentDocument.querySelector("#login_Login").click();
         
         return;

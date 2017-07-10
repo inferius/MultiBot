@@ -98,6 +98,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Building.cs" />
+    <Compile Include="Events\LoggingData.cs" />
+    <Compile Include="Events\PayloadRequest.cs" />
     <Compile Include="ForgeOfEmpires.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Manager.cs" />

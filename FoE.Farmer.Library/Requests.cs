@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Flurl;
 using Flurl.Http;
+using FoE.Farmer.Library.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -19,6 +20,9 @@ namespace FoE.Farmer.Library
 {
     public class Requests
     {
+        public static event PayloadSendRequestHandler PayloadSendRequest;
+        public delegate void PayloadSendRequestHandler(Requests m, Events.PayloadRequestEventArgs e);
+
         public static string UserName = "nms10266@uzrip.com";
         public static string Password = "nms10266@uzrip.com";
         public static string WorldName = null;
@@ -48,7 +52,7 @@ namespace FoE.Farmer.Library
         internal static string Domain => string.Format(BaseAddress, Server);
 
         private readonly Queue<(Payload, Action<JObject>)> payloads = new Queue<(Payload, Action<JObject>)>();
-        private Timer requestSendTimer = new Timer(1000);
+        private Timer requestSendTimer = new Timer(500);
 
         public Requests()
         {
@@ -62,30 +66,16 @@ namespace FoE.Farmer.Library
             if (payloads.Count == 1) requestSendTimer.Start();
         }
 
-        private async void SendPayload()
+        private void SendPayload()
         {
             if (payloads.Count == 0) return;
             if (string.IsNullOrWhiteSpace(UserKey) || string.IsNullOrWhiteSpace(SID)) return;
-
+            if (payloads.Count == 1) requestSendTimer.Stop();
 
             var item = payloads.Dequeue();
-            if (payloads.Count == 1) requestSendTimer.Stop();
             if (item.Item1.TaskSource.Task.IsCanceled) return;
 
-            //try
-            {
-                var jsonString = SendRequest3(item.Item1);
-                //var jsonString = await data.Content.ReadAsStringAsync();
-                
-                var res = JObject.Parse("{response:" + jsonString + "}");
-                item.Item1.TaskSource.SetResult(res);
-                item.Item2?.Invoke(res);
-            }
-            //catch (Exception e)
-            //{
-            //    item.Item1.TaskSource.SetException(e);
-            //    Debug.WriteLine(e);
-            //}
+            PayloadSendRequest?.Invoke(this, new PayloadRequestEventArgs { Payload = item.Item1 });
         }
 
         public static string BuildSignature(string data)

@@ -33,12 +33,12 @@ namespace FoE.Farmer.Library
                 switch (intervalType)
                 {
                     case (int)TimeIntervalGoods.FourHours:
-                        return DateTime.Now + TimeSpan.FromHours(4) + TimeSpan.FromMinutes(randSalt.Next(10, 59));
+                        return DateTime.Now + TimeSpan.FromHours(4) + TimeSpan.FromMinutes(randSalt.Next(10, 20));
                     case (int)TimeIntervalGoods.EightHours:
-                        return DateTime.Now + TimeSpan.FromHours(8) + TimeSpan.FromMinutes(randSalt.Next(10, 59));
+                        return DateTime.Now + TimeSpan.FromHours(8) + TimeSpan.FromMinutes(randSalt.Next(10, 35));
                     case (int)TimeIntervalGoods.OneDay:
                         return DateTime.Now + TimeSpan.FromHours(24) + TimeSpan.FromMinutes(randSalt.Next(10, 59));
-                    case (int)TimeIntervalGoods.TwoDay:
+                    case (int)TimeIntervalGoods.TwoDays:
                         return DateTime.Now + TimeSpan.FromHours(48) + TimeSpan.FromMinutes(randSalt.Next(10, 59));
                 }
             }
@@ -47,14 +47,14 @@ namespace FoE.Farmer.Library
                 switch (intervalType)
                 {
                     case (int)TimeIntervalSupplies.FiveMinutes:
-                        return DateTime.Now + TimeSpan.FromMinutes(5) + TimeSpan.FromMinutes(randSalt.Next(1, 4));
-                    case (int)TimeIntervalSupplies.FiftenMinuts:
-                        return DateTime.Now + TimeSpan.FromMinutes(15) + TimeSpan.FromMinutes(randSalt.Next(1, 5));
+                        return DateTime.Now + TimeSpan.FromMinutes(5) + TimeSpan.FromSeconds(randSalt.Next(30, 120));
+                    case (int)TimeIntervalSupplies.FiftenMinutes:
+                        return DateTime.Now + TimeSpan.FromMinutes(15) + TimeSpan.FromSeconds(randSalt.Next(60, 180));
                     case (int)TimeIntervalSupplies.OneHour:
                         return DateTime.Now + TimeSpan.FromHours(1) + TimeSpan.FromMinutes(randSalt.Next(3, 10));
-                    case (int)TimeIntervalSupplies.FourHour:
+                    case (int)TimeIntervalSupplies.FourHours:
                         return DateTime.Now + TimeSpan.FromHours(4) + TimeSpan.FromMinutes(randSalt.Next(3, 15));
-                    case (int)TimeIntervalSupplies.EightHour:
+                    case (int)TimeIntervalSupplies.EightHours:
                         return DateTime.Now + TimeSpan.FromHours(8) + TimeSpan.FromMinutes(randSalt.Next(3, 25));
                     case (int)TimeIntervalSupplies.OneDay:
                         return DateTime.Now + TimeSpan.FromHours(24) + TimeSpan.FromMinutes(randSalt.Next(3, 30));
@@ -69,8 +69,9 @@ namespace FoE.Farmer.Library
             if (fromDate == null) fromDate = DateTime.Now;
             var randSalt = new Random();
             var maxSalt = (int) (productionTime / 10f);
+            if (maxSalt < 10) maxSalt = 15;
 
-            return fromDate.Value + TimeSpan.FromSeconds(productionTime) + TimeSpan.FromSeconds(randSalt.Next(20, maxSalt));
+            return fromDate.Value + TimeSpan.FromSeconds(productionTime) + TimeSpan.FromSeconds(randSalt.Next(10, maxSalt));
         }
     }
 }

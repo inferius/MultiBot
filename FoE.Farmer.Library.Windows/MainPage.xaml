@@ -16,7 +16,7 @@
             <TabItem Header="Log">
                 <Grid>
                     <Button x:Name="StartStopBtn" Content="Start" Margin="0,10,10,0" Click="StartStopBtn_Click" Height="57" VerticalAlignment="Top" HorizontalAlignment="Right" Width="80"/>
-                    <RichTextBox Margin="10,72,10,10.2">
+                    <RichTextBox x:Name="LogBox" Margin="10,72,10,10.2">
                         <FlowDocument>
                             <Paragraph>
                                 <Run Text=""/>
@@ -32,28 +32,28 @@
 
             </TabItem>
             <TabItem Header="Config">
-                <Grid>
+                <Grid x:Name="ConfigGrid">
                     <Label Content="Goods Timer" Width="100" Margin="0,0,344,229.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton GroupName="GoodsTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="10,26,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton GroupName="GoodsTimer" IsChecked="True" Content="8 hours" Tag="EightHours" Width="100" Margin="10,50,334,181.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton GroupName="GoodsTimer" Content="1 day" Tag="OneDay" Width="100" Margin="10,74,334,157.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton GroupName="GoodsTimer" Content="2 days" Tag="TwoDay" Width="100" Margin="10,98,334,133.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="10,26,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" IsChecked="True" Content="8 hours" Tag="EightHours" Width="100" Margin="10,50,334,181.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="1 day" Tag="OneDay" Width="100" Margin="10,74,334,157.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="2 days" Tag="TwoDays" Width="100" Margin="10,98,334,133.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
                     <Label Content="Supplies Timer" Width="100" Margin="100,0,244,229.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="110,31,234,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinuts" Width="100" Margin="110,55,234,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="110,79,234,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="110,104,234,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="110,128,234,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="SuppliesTimer" Content="1 day" Tag="OneDay" Width="100" Margin="110,152,234,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="110,31,234,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinutes" Width="100" Margin="110,55,234,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="110,79,234,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="110,104,234,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="110,128,234,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="1 day" Tag="OneDay" Width="100" Margin="110,152,234,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
 
                     <Label Content="Residental Timer" Width="100" Margin="205,0,139,229.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="215,31,129,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinuts" Width="100" Margin="215,55,129,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="215,79,129,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="215,104,129,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="215,128,129,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton GroupName="ResidentalTimer" Content="1 day" Tag="OneDay" Width="100" Margin="215,152,129,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="215,31,129,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinutes" Width="100" Margin="215,55,129,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="215,79,129,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="215,104,129,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="215,128,129,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="1 day" Tag="OneDay" Width="100" Margin="215,152,129,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
 
                     <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="User name"  x:Name="UserName" Height="23" TextWrapping="Wrap" Text="" Margin="408,23,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303"/>
                     <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="World name"  x:Name="WorldName" Height="23" TextWrapping="Wrap" Text="" Margin="408,84,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303"/>

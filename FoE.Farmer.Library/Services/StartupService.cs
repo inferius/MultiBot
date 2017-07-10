@@ -30,11 +30,13 @@ namespace FoE.Farmer.Library.Services
                 Name = j["user_name"].ToString()
             };
 
+            Manager.Log($"Loaded players data. ID: {me.ID} and Name: {me.Name}");
             ForgeOfEmpires.Manager.Me = me;
         }
 
         private static void ParseSocialBar(JToken j)
         {
+            Manager.Log($"Loaded other players data. Count: {(j as JArray)?.Count ?? 0}");
             foreach (var item in j as JArray)
             {
                 var isFriend = item["is_friend"]?.ToObject<bool>() ?? false;
@@ -59,6 +61,7 @@ namespace FoE.Farmer.Library.Services
 
         private static void ParseCityMap(JToken j)
         {
+            Manager.Log($"Loaded buildings and road. Count: {(j["entities"] as JArray)?.Count ?? 0}");
             foreach (var item in j["entities"] as JArray)
             {
                 var b = Building.LoadFromJSON(item as JObject);

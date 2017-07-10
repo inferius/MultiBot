@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
+using System.Windows.Media;
 using CefSharp;
 using CefSharp.Wpf;
 using MiCHALosoft;
@@ -21,6 +24,7 @@ namespace FoE.Farmer.Library.Windows
         private static ChromiumWebBrowser Browser;
         private static bool CookieLoaded = false;
         private static Dictionary<string, Payload> payloads = new Dictionary<string, Payload>();
+        private static bool ConfigLoaded = false;
         public MainPage(Window w)
         {
             InitBrowser();
@@ -29,13 +33,6 @@ namespace FoE.Farmer.Library.Windows
 
             RequestObject.DataRecived += (o, args) =>
             {
-                //using (var sw = new StreamWriter("_rq_data.txt", true))
-                //{
-                //    sw.WriteLine(args.Data);
-                //    sw.WriteLine();
-                //    sw.WriteLine();
-
-                //}
                 payloads[args.Id].TaskSource.SetResult(args.Data);
                 ForgeOfEmpires.Manager.ParseStringData(args.Data);
             };
@@ -44,9 +41,22 @@ namespace FoE.Farmer.Library.Windows
 
             w.Closed += (sender, args) =>
             {
+                SaveConfig();
                 Config.Save();
                 Cef.Shutdown();
                 Environment.Exit(0);
+            };
+
+            Requests.PayloadSendRequest += (requests, args) =>
+            {
+                SendRequest(args.Payload);
+            };
+
+            Manager.LogMessageSend += (manager, args) =>
+            {
+                Dispatcher.Invoke(() => LogBox.AppendText(args.Message + "\n"));
+                //var tr = new TextRange(LogBox.Document.ContentEnd, LogBox.Document.ContentEnd) {Text = args.Message};
+                //tr.ApplyPropertyValue(TextElement.­ForegroundProperty, Brushes.Red);
             };
         }
 
@@ -72,7 +82,6 @@ namespace FoE.Farmer.Library.Windows
             }
 
             settings.CefCommandLineArgs.Add("enable-npapi", "1");
-            //settings.CefCommandLineArgs.Add("enable-system-flash", "1");
             //settings.CefCommandLineArgs.Add("ppapi-flash-version", @"26.0.0.131");
             //settings.CefCommandLineArgs.Add("ppapi-flash-path", @"C:\Temp\pepflashplayer64_26_0_0_131.dll");
             settings.IgnoreCertificateErrors = true;
@@ -90,21 +99,13 @@ namespace FoE.Farmer.Library.Windows
             Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
 
             Browser.WebBrowser = Browser;
-
-            //Browser.Address = new Uri("http://isflashinstalled.com").AbsoluteUri;
             Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
 
-
-            //BrowserGrid.Children.Add(Browser);
 
             Browser.BrowserSettings.DefaultEncoding = "UTF-8";
             Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
             Browser.BrowserSettings.WindowlessFrameRate = 60;
 
-            //Browser.IsBrowserInitializedChanged += (sender, args) => Browser.ShowDevTools();
-
-            //Browser.WebBrowser.LoadHtml(ReadFileContents(@"Local\test.html"), "test dsd");
-            //Browser.ConsoleMessage += (sender, args) => MessageBox.Show(args.Message);
             Browser.RequestHandler = new RequestHandler();
             Browser.IsBrowserInitializedChanged += (sender, args) =>
             {
@@ -124,7 +125,6 @@ namespace FoE.Farmer.Library.Windows
 
 
             var assembly = Assembly.GetExecutingAssembly();
-            //var names = assembly.GetManifestResourceNames();
             const string resourceName = "FoE.Farmer.Library.Windows.External.Inject.js";
 
             using (var stream = assembly.GetManifestResourceStream(resourceName))
@@ -149,10 +149,8 @@ namespace FoE.Farmer.Library.Windows
             var visitor = new CookieManager();
             if (Cef.GetGlobalCookieManager().VisitAllCookies(visitor))
                 visitor.WaitForAllCookies();
-            //var sb = new StringBuilder();
             foreach (var nameValue in visitor.NamesValues)
             {
-                //sb.AppendLine(nameValue.Item1 + " = " + nameValue.Item2);
                 switch (nameValue.Item1)
                 {
                     case "metricsUvId": Requests.MetricsUvId = nameValue.Item2; break;
@@ -168,30 +166,24 @@ namespace FoE.Farmer.Library.Windows
                 }
             }
             LoadRequestString();
-
-            //MessageBox.Show(sb.ToString());
-            //using (var sw = new StreamWriter("cookies.txt"))
-            //{
-            //    sw.Write(sb);
-            //}
-
-            //Cef.GetGlobalCookieManager().VisitAllCookies(visitor);
         }
 
         private static void LoadRequestString()
         {
 
-            var FncSend = "function sendRequest(data, signature){return new Promise((r, c) => {$.ajax({type: 'POST',url: '/game/json?h=" + Requests.UserKey + "', data: data, dataType: 'json', beforeSend: (xhr) => {" +
+            var FncSend = "function sendRequest(data, signature){return new Promise((r, c) => {$.ajax({type: 'POST',url: '/game/json?h=" + Requests.UserKey + "', data: data, contentType: 'application/json', dataType: 'json', beforeSend: (xhr) => {" +
                           "xhr.setRequestHeader('Signature', signature);" +
                           $"xhr.setRequestHeader('Client-Identification', '{Requests.TemplateRequestHeader["Client-Identification"]}');" +
                           $"xhr.setRequestHeader('X-Requested-With', '{Requests.TemplateRequestHeader["X-Requested-With"]}');" +
                           "},success: function(result) {r(result);},error: function(result) { c(result);}});});}";
 
             Browser.ExecuteScriptAsync(FncSend);
+            ForgeOfEmpires.Manager.IsInitialized = true;
         }
 
         public static async void SendRequest(Payload payload)
         {
+            Manager.Log("Request sent: " + payload.ToString());
             var data = "[" + payload + "]";
             var signature = Requests.BuildSignature(data);
             var script = $"(async () => responseManager.setData(JSON.stringify(await sendRequest('{data}', '{signature}')), '{signature}') )();";
@@ -209,24 +201,22 @@ namespace FoE.Farmer.Library.Windows
                 Config.SetValue("UserName", Requests.UserName);
             }
 
-            if (WorldName.Text.Trim().Length > 0)
+            if (WorldName.Text != null)
             {
-                Requests.UserName = WorldName.Text.Trim();
-                Config.SetValue("WorldName", Requests.UserName);
+                Requests.WorldName = WorldName.Text.Trim();
+                Config.SetValue("WorldName", Requests.WorldName);
             }
-            
+
 
         }
 
-        private async void StartStopBtn_Click(object sender, RoutedEventArgs e)
+        private void StartStopBtn_Click(object sender, RoutedEventArgs e)
         {
             SendRequest(Payloads.StartupService.GetData());
-            //ForgeOfEmpires.Manager.StartupService();
         }
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            //LoadScripts();
             if (Browser.IsBrowserInitialized) Browser.ShowDevTools();
         }
 
@@ -242,6 +232,34 @@ namespace FoE.Farmer.Library.Windows
                 Requests.Password = Password.Password.Trim();
                 Config.SetValue("Password", Requests.Password);
             }
+        }
+
+        private void UpdateUserInterval()
+        {
+            if (!ConfigLoaded) return;
+
+            var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+            var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+            var residentalTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+
+            if (!Enum.TryParse(goodsTimer, false, out TimeIntervalGoods goodsEnum))
+            {
+                goodsEnum = TimeIntervalGoods.EightHours;
+            }
+
+            if (!Enum.TryParse(suppliesTimer, false, out TimeIntervalSupplies suppliesEnum))
+            {
+                suppliesEnum = TimeIntervalSupplies.EightHours;
+            }
+
+            if (!Enum.TryParse(residentalTimer, false, out TimeIntervalSupplies residentalEnum))
+            {
+                residentalEnum = TimeIntervalSupplies.EightHours;
+            }
+
+            ForgeOfEmpires.Manager.UserIntervalGoods = goodsEnum;
+            ForgeOfEmpires.Manager.UserIntervalSupplies = suppliesEnum;
+            ForgeOfEmpires.Manager.UserIntervalResidental = residentalEnum;
         }
 
         public void LoadConfig()
@@ -265,6 +283,71 @@ namespace FoE.Farmer.Library.Windows
                 Requests.WorldName = pwd;
                 WorldName.Text = pwd;
             }
+
+            var val = Config.GetValue("GoodsTimer");
+            if (val != null)
+            {
+                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.Tag.ToString() == val);
+                if (goodsTimer != null) goodsTimer.IsChecked = true;
+            }
+
+            val = Config.GetValue("SuppliesTimer");
+            if (val != null)
+            {
+                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer")
+                    .FirstOrDefault(r => r.Tag.ToString() == val);
+                if (goodsTimer != null) goodsTimer.IsChecked = true;
+            }
+
+            val = Config.GetValue("ResidentalTimer");
+            if (val != null)
+            {
+                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer")
+                    .FirstOrDefault(r => r.Tag.ToString() == val);
+                if (goodsTimer != null) goodsTimer.IsChecked = true;
+            }
+            ConfigLoaded = true;
+            UpdateUserInterval();
+        }
+
+        public void SaveConfig()
+        {
+            if (UserName.Text.Trim().Length > 0)
+            {
+                Requests.UserName = UserName.Text.Trim();
+                Config.SetValue("UserName", Requests.UserName);
+            }
+            if (WorldName.Text != null)
+            {
+                Requests.WorldName = WorldName.Text.Trim();
+                Config.SetValue("WorldName", Requests.WorldName);
+            }
+            if (Password.Password.Length > 0)
+            {
+                Requests.Password = Password.Password.Trim();
+                Config.SetValue("Password", Requests.Password);
+            }
+            var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+            var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+            var residentalTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+
+            if (goodsTimer != null)
+            {
+                Config.SetValue("GoodsTimer", goodsTimer);
+            }
+            if (suppliesTimer != null)
+            {
+                Config.SetValue("SuppliesTimer", suppliesTimer);
+            }
+            if (residentalTimer != null)
+            {
+                Config.SetValue("ResidentalTimer", residentalTimer);
+            }
+        }
+
+        private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+        {
+            UpdateUserInterval();
         }
     }
 }

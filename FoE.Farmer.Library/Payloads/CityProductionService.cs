@@ -13,11 +13,13 @@ namespace FoE.Farmer.Library.Payloads
 
         public static Payload PickupProduction(Building[] buildings)
         {
+            var j = new JArray();
+            j.Add(new JArray(buildings.Select(item => item.ID)));
             return new Payload
             {
                 RequestClass = ClassName,
                 RequestMethod = "pickupProduction",
-                RequestData = new JArray(new JArray(buildings.Select(item => item.ID)))
+                RequestData = j
             };
         }
 
