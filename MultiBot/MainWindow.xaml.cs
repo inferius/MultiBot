@@ -23,7 +23,6 @@ namespace MultiBot
         public MainWindow()
         {
             InitializeComponent();
-
             var d = new FoE.Farmer.Library.Windows.MainPage(this);
             MainFrame.Navigate(d);
         }

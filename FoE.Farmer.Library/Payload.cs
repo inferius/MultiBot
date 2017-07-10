@@ -17,9 +17,9 @@ namespace FoE.Farmer.Library
         private static int requestId => _requestId++;
         public string RequestMethod { get; set; }
         public int RequestId { get; private set; }
-        public Task<object> Task => TaskSource.Task;
+        public Task<JArray> Task => TaskSource.Task;
 
-        public TaskCompletionSource<object> TaskSource = new TaskCompletionSource<object>();
+        public TaskCompletionSource<JArray> TaskSource = new TaskCompletionSource<JArray>();
 
         public Payload()
         {
@@ -44,6 +44,11 @@ namespace FoE.Farmer.Library
             TaskSource.SetCanceled();
         }
 
+        public Task<JArray> Send()
+        {
+            ForgeOfEmpires.Manager.Requests.AddPayload(this);
+            return Task;
+        }
 
         public override string ToString()
         {

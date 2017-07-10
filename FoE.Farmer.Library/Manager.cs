@@ -20,14 +20,48 @@ namespace FoE.Farmer.Library
 
         public event LogoutEventHandler LogoutEvent;
         public delegate void LogoutEventHandler(Manager m, Events.LogoutEvent e);
+
+        private JObject Config = new JObject();
+        public static JObject Cache = new JObject();
+
+        private static string CachePath { get; set; } = "FoFCache.json";
+
         public List<Player> Players { get; } = new List<Player>();
         public Player Me { get; set; }
         public Requests Requests { get; set; } = new Requests();
         public Player GetPlayerById(int id) => Players.Find(item => item.ID == id);
 
-        public DateTime NextMinGoodsTime { get; set; } = DateTime.MinValue;
-        public DateTime NextMinResidentalTime { get; set; } = DateTime.MinValue;
-        public DateTime NextMinSuppliesTime { get; set; } = DateTime.MinValue;
+        private DateTime _nextMinGoodsTime = DateTime.MinValue;
+        public DateTime NextMinGoodsTime
+        {
+            get => _nextMinGoodsTime;
+            set
+            {
+                CurrentCache["NextMinGoodsTime"] = value;
+                _nextMinGoodsTime = value;
+            }
+        }
+
+        private DateTime _nextMinResidentalTime = DateTime.MinValue;
+        public DateTime NextMinResidentalTime
+        {
+            get => _nextMinResidentalTime;
+            set
+            {
+                CurrentCache["NextMinResidentalTime"] = value;
+                _nextMinResidentalTime = value;
+            }
+        }
+        private DateTime _nextMinSuppliesTime = DateTime.MinValue;
+        public DateTime NextMinSuppliesTime
+        {
+            get => _nextMinSuppliesTime;
+            set
+            {
+                CurrentCache["NextMinSuppliesTime"] = value;
+                _nextMinSuppliesTime = value;
+            }
+        }
 
         public bool IsInitialized { get; set; } = false;
         public bool IsStartupServicesLoad { get; set; } = false;
@@ -38,7 +72,7 @@ namespace FoE.Farmer.Library
         private TimeIntervalSupplies _userIntervalResidental = TimeIntervalSupplies.FiftenMinutes;
 
         private Timer _timer = new Timer(60000);
-        
+
         public TimeIntervalGoods UserIntervalGoods
         {
             get => _userIntervalGoods;
@@ -55,8 +89,28 @@ namespace FoE.Farmer.Library
             set { _userIntervalResidental = value; UpdateBuildingInterval(); }
         }
 
+        public JObject CurrentCache => Cache[Me.ID.ToString()] as JObject;
+
+        static Manager()
+        {
+            if (File.Exists(CachePath)) Cache = JObject.Parse(File.ReadAllText(CachePath));
+        }
+
+        internal static void InitCache()
+        {
+            if (Cache[ForgeOfEmpires.Manager.Me.ID.ToString()] == null) Cache[ForgeOfEmpires.Manager.Me.ID.ToString()] = new JObject();
+            if (Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"] == null) Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"] = new JObject();
+
+        }
+        public static void SaveCache()
+        {
+            File.WriteAllText(CachePath, Cache.ToString(Formatting.None));
+        }
+
         public Manager()
         {
+            if (File.Exists("FoFFriendData.json")) Config = JObject.Parse(File.ReadAllText("FoFFriendData.json"));
+
             _timer.Elapsed += (sender, args) =>
             {
                 RunCheckTimer();
@@ -89,6 +143,21 @@ namespace FoE.Farmer.Library
 
         }
 
+        public void TavernAndAidService()
+        {
+            Me.Tavern.CheckTavernOccupation();
+            var countAid = 0;
+            var countTavern = 0;
+            foreach (var player in Players)
+            {
+                if (player.CanAidable) countAid++;
+                if (player.Tavern.CanSit) countTavern++;
+                player.Tavern.Sit();
+                player.Aid();
+            }
+            if (countTavern > 0 || countAid > 0) Log($"Tavern sitting: {countTavern} and players help: {countAid}");
+        }
+
         private void PickupByType(BuildType type)
         {
             foreach (var building in Me.Buildings.Where(item => item.CanPickup && item.Type == type))
@@ -105,6 +174,7 @@ namespace FoE.Farmer.Library
         public void RunCheckTimer()
         {
             PickupBuildings();
+            TavernAndAidService();
         }
 
         private void UpdateBuildingInterval()
@@ -122,7 +192,24 @@ namespace FoE.Farmer.Library
         private void StartupService()
         {
             IsStartupServicesLoad = true;
-            PickupBuildings();
+            // Load cache
+            if (CurrentCache["NextMinGoodsTime"] != null)
+            {
+                _nextMinGoodsTime = CurrentCache["NextMinGoodsTime"].ToObject<DateTime>();
+                Log($"Next goods pickup loaded from cache: {NextMinGoodsTime.ToLocalTime()}");
+            }
+            if (CurrentCache["NextMinSuppliesTime"] != null)
+            {
+                _nextMinSuppliesTime = CurrentCache["NextMinSuppliesTime"].ToObject<DateTime>();
+                Log($"Next supplies pickup loaded from cache: {NextMinSuppliesTime.ToLocalTime()}");
+            }
+            if (CurrentCache["NextMinResidentalTime"] != null)
+            {
+                _nextMinResidentalTime = CurrentCache["NextMinResidentalTime"].ToObject<DateTime>();
+                Log($"Next residental pickup loaded from cache: {NextMinResidentalTime.ToLocalTime()}");
+            }
+
+            RunCheckTimer();
             _timer.Start();
             IsStarted = true;
         }
@@ -147,6 +234,8 @@ namespace FoE.Farmer.Library
         public void ParseStringData(string data)
         {
             var ja = JArray.Parse(data);
+            var taverUnlocked = 0;
+            var taverOccup = 0;
 
             foreach (var item in ja)
             {
@@ -168,7 +257,16 @@ namespace FoE.Farmer.Library
                 switch (j["requestClass"].ToString())
                 {
                     case "FriendsTavernService":
-                        // Tavern service
+                        if (j["requestMethod"].ToString() == "getSittingPlayersCount")
+                        {
+                            var ja2 = j["responseData"] as JArray;
+                            taverUnlocked = (ja2[1]).ToObject<int>();
+                            taverOccup = (ja2[2]).ToObject<int>();
+                        }
+                        else if (j["requestMethod"].ToString() == "getOwnTavern")
+                        {
+                            Me.Tavern.Parse(j);
+                        }
                         break;
                     case "ResearchService":
                         // Research saervice
@@ -179,20 +277,35 @@ namespace FoE.Farmer.Library
                     case "StartupService":
                         Services.StartupService.Parse(j["responseData"] as JObject);
                         StartupService();
+                        Me.Tavern.UnlockedChairs = taverUnlocked;
+                        Me.Tavern.OccupiedChairs = taverOccup;
+
                         break;
                 }
-                
+
             }
         }
 
-        public static void Log(string text)
+        public static void Log(string text, LogMessageType type = LogMessageType.Info)
         {
-            LogMessageSend?.Invoke(ForgeOfEmpires.Manager, new LoggingDataEventArgs { Message = text });
+            LogMessageSend?.Invoke(ForgeOfEmpires.Manager, new LoggingDataEventArgs { Message = text, Type = type });
         }
 
         public void ParseStartupData()
         {
-            
+
         }
+    }
+
+    [Flags]
+    public enum LogMessageType
+    {
+        Warning = 0b0000_0001,
+        Info = 0b0000_0010,
+        Error = 0b0000_0100,
+        Debug = 0b0000_1000,
+        Request = 0b0001_0000,
+        Verbose = 0b1111_1111,
+        AllWithoutRequest = 0b1110_1111
     }
 }

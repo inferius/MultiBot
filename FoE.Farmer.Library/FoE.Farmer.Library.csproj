@@ -118,6 +118,7 @@
     <Compile Include="Research.cs" />
     <Compile Include="ResourcesInfo.cs" />
     <Compile Include="Services\StartupService.cs" />
+    <Compile Include="Services\TavernService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

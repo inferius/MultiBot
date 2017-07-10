@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FoE.Farmer.Library
 {
-    public class ForgeOfEmpires
+    public static class ForgeOfEmpires
     {
         public static Manager Manager = new Manager();
     }

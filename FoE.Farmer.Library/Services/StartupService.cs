@@ -32,11 +32,13 @@ namespace FoE.Farmer.Library.Services
 
             Manager.Log($"Loaded players data. ID: {me.ID} and Name: {me.Name}");
             ForgeOfEmpires.Manager.Me = me;
+            Manager.InitCache();
         }
 
         private static void ParseSocialBar(JToken j)
         {
             Manager.Log($"Loaded other players data. Count: {(j as JArray)?.Count ?? 0}");
+
             foreach (var item in j as JArray)
             {
                 var isFriend = item["is_friend"]?.ToObject<bool>() ?? false;
@@ -48,8 +50,16 @@ namespace FoE.Farmer.Library.Services
                     IsSelf = item["is_self"].ToObject<bool>(),
                     IsNeighbour = item["is_neighbor"]?.ToObject<bool>() ?? false,
                     IsGuildMember = item["is_guild_member"]?.ToObject<bool>() ?? false,
-                    ID = item["player_id"].ToObject<int>()
+                    ID = item["player_id"].ToObject<int>(),
+                    NextHelp = item["next_interaction_in"] != null ? DateTime.Now + TimeSpan.FromSeconds(item["next_interaction_in"].ToObject<int>()) : DateTime.Now
                 };
+
+                var p_cache = ForgeOfEmpires.Manager.CurrentCache["Players"][p.ID.ToString()];
+                if (p_cache != null)
+                {
+                    if (p_cache["NextHelp"] != null) p.NextHelp = p_cache["NextHelp"].ToObject<DateTime>();
+                    if (p_cache["TavernNextCheck"] != null) p.Tavern.MinTavernCheckTime = p_cache["TavernNextCheck"].ToObject<DateTime>();
+                }
 
                 if (!isFriend && !isInvited) p.IsFriend = FriendStatus.NoFriend;
                 else if (isFriend) p.IsFriend = FriendStatus.Friend;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FoE.Farmer.Library.Payloads;
+using Newtonsoft.Json.Linq;
 
 namespace FoE.Farmer.Library
 {
@@ -15,15 +16,20 @@ namespace FoE.Farmer.Library
         public bool IsNeighbour { get; set; } = false;
         public bool IsGuildMember { get; set; } = false;
         public FriendStatus IsFriend { get; set; } = FriendStatus.NoFriend;
-        public DateTime LastTavernVisit { get; set; }
-        public DateTime LastHelp { get; set; }
+        public DateTime NextHelp { get; set; } = DateTime.Now;
         public List<Building> Buildings { get; } = new List<Building>();
+        public Services.TavernService Tavern { get; set; }
+
+        public Player()
+        {
+            Tavern = new Services.TavernService {Owner = this};
+        }
 
         public bool CanAidable
         {
             get
             {
-                if (LastHelp > DateTime.Now) return false;
+                if (NextHelp > DateTime.Now) return false;
                 if (IsSelf) return false;
 
                 if (IsNeighbour) return true;
@@ -31,15 +37,25 @@ namespace FoE.Farmer.Library
             }
         }
 
-        public Payload Aid()
+        public void Aid()
         {
-            if (CanAidable) return OtherPlayerService.PolivateRandomBuilding(this);
-            return null;
+            if (CanAidable)
+            {
+                NextHelp = DateTime.Now + TimeSpan.FromHours(24);
+                OtherPlayerService.PolivateRandomBuilding(this).Send();
+                SetCache("NextHelp", NextHelp);
+            }
         }
 
         public Payload Visit()
         {
             return OtherPlayerService.Visit(this);
+        }
+
+        public void SetCache(string attr, DateTime value)
+        {
+            if (Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()] == null) Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()] = new JObject();
+            Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()][attr] = value;
         }
     }
 

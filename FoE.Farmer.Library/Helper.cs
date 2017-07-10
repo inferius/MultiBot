@@ -73,5 +73,21 @@ namespace FoE.Farmer.Library
 
             return fromDate.Value + TimeSpan.FromSeconds(productionTime) + TimeSpan.FromSeconds(randSalt.Next(10, maxSalt));
         }
+
+        public static JToken GetObjectByClass(JArray arr, string _class, string method = null)
+        {
+            if (arr == null) return null;
+
+            foreach (var item in arr)
+            {
+                if (item["requestClass"].ToString() == _class)
+                {
+                    if (method == null) return item;
+                    if (method == item["requestMethod"].ToString()) return item;
+                }
+            }
+
+            return null;
+        }
     }
 }
