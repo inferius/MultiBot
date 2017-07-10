@@ -9,8 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 using CefSharp;
 using CefSharp.Wpf;
+using FoE.Farmer.Library.Windows.Helpers;
 using MiCHALosoft;
 
 namespace FoE.Farmer.Library.Windows
@@ -25,6 +27,8 @@ namespace FoE.Farmer.Library.Windows
         private static bool CookieLoaded = false;
         private static Dictionary<string, Payload> payloads = new Dictionary<string, Payload>();
         private static bool ConfigLoaded = false;
+        private static bool AutoStart = false;
+
         public MainPage(Window w)
         {
             InitBrowser();
@@ -58,6 +62,12 @@ namespace FoE.Farmer.Library.Windows
                 //var tr = new TextRange(LogBox.Document.ContentEnd, LogBox.Document.ContentEnd) {Text = args.Message};
                 //tr.ApplyPropertyValue(TextElement.­ForegroundProperty, Brushes.Red);
             };
+
+            ForgeOfEmpires.Manager.LogoutEvent += (manager, args) =>
+            {
+                Relogin();
+            };
+
         }
 
         public void InitBrowser()
@@ -122,8 +132,6 @@ namespace FoE.Farmer.Library.Windows
 
         private static void LoadScripts()
         {
-
-
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "FoE.Farmer.Library.Windows.External.Inject.js";
 
@@ -140,6 +148,16 @@ namespace FoE.Farmer.Library.Windows
 
             //Browser.ExecuteScriptAsync()
 
+        }
+
+        public void Relogin()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                CookieLoaded = false;
+                Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+                AutoStart = true;
+            });
         }
 
         public static void ShowCookies()
@@ -166,6 +184,11 @@ namespace FoE.Farmer.Library.Windows
                 }
             }
             LoadRequestString();
+
+            if (AutoStart)
+            {
+                SendRequest(Payloads.StartupService.GetData());
+            }
         }
 
         private static void LoadRequestString()
@@ -222,6 +245,9 @@ namespace FoE.Farmer.Library.Windows
 
         private void ButtonBase1_OnClick(object sender, RoutedEventArgs e)
         {
+            AutoStart = ForgeOfEmpires.Manager.IsStarted;
+
+            CookieLoaded = false;
             Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
         }
 
@@ -230,7 +256,8 @@ namespace FoE.Farmer.Library.Windows
             if (Password.Password.Length > 0)
             {
                 Requests.Password = Password.Password.Trim();
-                Config.SetValue("Password", Requests.Password);
+                var pwd = StringCipher.Encrypt(Password.Password, "FoEMultiBot");
+                Config.SetValue("Password", pwd);
             }
         }
 
@@ -265,8 +292,9 @@ namespace FoE.Farmer.Library.Windows
         public void LoadConfig()
         {
             var pwd = Config.GetValue("Password");
-            if (pwd != null)
+            if (!string.IsNullOrEmpty(pwd))
             {
+                pwd = StringCipher.Decrypt(pwd, "FoEMultiBot");
                 Requests.Password = pwd;
                 Password.Password = pwd;
             }
@@ -324,8 +352,9 @@ namespace FoE.Farmer.Library.Windows
             }
             if (Password.Password.Length > 0)
             {
-                Requests.Password = Password.Password.Trim();
-                Config.SetValue("Password", Requests.Password);
+                var pwd = StringCipher.Encrypt(Password.Password, "FoEMultiBot");
+                Requests.Password = Password.Password;
+                Config.SetValue("Password", pwd);
             }
             var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
             var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();

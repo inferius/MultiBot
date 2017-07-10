@@ -104,7 +104,6 @@ namespace FoE.Farmer.Library.Windows
                             {
                                 Requests.Timestamp = uri.Substring(uri.IndexOf("Main.swf?") + "Main.swf?".Length);
                             }
-
                             else if (uri.IndexOf("/json") != -1)
                             {
                                 Requests.UserKey = uri.Substring(uri.IndexOf("json?h=") + "json?h=".Length);

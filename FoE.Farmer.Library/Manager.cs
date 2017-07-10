@@ -17,6 +17,9 @@ namespace FoE.Farmer.Library
     {
         public static event LoggingDataHandler LogMessageSend;
         public delegate void LoggingDataHandler(Manager m, Events.LoggingDataEventArgs e);
+
+        public event LogoutEventHandler LogoutEvent;
+        public delegate void LogoutEventHandler(Manager m, Events.LogoutEvent e);
         public List<Player> Players { get; } = new List<Player>();
         public Player Me { get; set; }
         public Requests Requests { get; set; } = new Requests();
@@ -28,6 +31,7 @@ namespace FoE.Farmer.Library
 
         public bool IsInitialized { get; set; } = false;
         public bool IsStartupServicesLoad { get; set; } = false;
+        public bool IsStarted { get; set; } = false;
 
         private TimeIntervalGoods _userIntervalGoods = TimeIntervalGoods.EightHours;
         private TimeIntervalSupplies _userIntervalSupplies = TimeIntervalSupplies.FiftenMinutes;
@@ -120,6 +124,7 @@ namespace FoE.Farmer.Library
             IsStartupServicesLoad = true;
             PickupBuildings();
             _timer.Start();
+            IsStarted = true;
         }
 
         //public void Start()
@@ -130,6 +135,7 @@ namespace FoE.Farmer.Library
         public void Stop()
         {
             _timer.Stop();
+            IsStarted = false;
         }
 
         public void ParseStringData(string data)
@@ -139,6 +145,17 @@ namespace FoE.Farmer.Library
             foreach (var item in ja)
             {
                 var j = item as JObject;
+
+                if (j["__class__"].ToString() == "Redirect")
+                {
+                    LogoutEvent?.Invoke(this, new LogoutEvent());
+                    return;
+                }
+                if (j["__class__"].ToString() == "Error")
+                {
+                    Log("Error:" + j.ToString());
+                    return;
+                }
 
                 switch (j["requestClass"].ToString())
                 {
