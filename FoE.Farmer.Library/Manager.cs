@@ -138,6 +138,12 @@ namespace FoE.Farmer.Library
             IsStarted = false;
         }
 
+        public void Start()
+        {
+            _timer.Start();
+            IsStarted = true;
+        }
+
         public void ParseStringData(string data)
         {
             var ja = JArray.Parse(data);
@@ -148,6 +154,8 @@ namespace FoE.Farmer.Library
 
                 if (j["__class__"].ToString() == "Redirect")
                 {
+                    _timer.Stop();
+                    Log("Session Timeout! Relogin requested.");
                     LogoutEvent?.Invoke(this, new LogoutEvent());
                     return;
                 }

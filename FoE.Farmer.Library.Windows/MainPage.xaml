@@ -25,7 +25,7 @@
                     </RichTextBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Browser">
+            <TabItem Header="Browser" x:Name="BrowserTabItem">
                 <Grid x:Name="BrowserGrid">
                     <!--<cefSharp:ChromiumWebBrowser x:Name="Browser"></cefSharp:ChromiumWebBrowser>-->
                 </Grid>

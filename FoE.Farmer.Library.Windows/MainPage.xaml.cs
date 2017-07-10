@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define UI_BROWSER
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +13,11 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using CefSharp;
+#if UI_BROWSER
 using CefSharp.Wpf;
+#else
+using CefSharp.OffScreen;
+#endif
 using FoE.Farmer.Library.Windows.Helpers;
 using MiCHALosoft;
 
@@ -33,7 +39,11 @@ namespace FoE.Farmer.Library.Windows
         {
             InitBrowser();
             InitializeComponent();
+#if UI_BROWSER
             BrowserGrid.Children.Add(Browser);
+#else
+            BrowserTabItem.Visibility = Visibility.Collapsed;
+#endif
 
             RequestObject.DataRecived += (o, args) =>
             {
@@ -72,14 +82,14 @@ namespace FoE.Farmer.Library.Windows
 
         public void InitBrowser()
         {
+#if UI_BROWSER
             Cef.EnableHighDPISupport();
-
-
+#endif
 
             var settings = new CefSettings();
             settings.RemoteDebuggingPort = 8088;
             settings.WindowlessRenderingEnabled = true;
-            settings.CachePath = @"C:\Temp\Cache";
+            settings.CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft\\FoFBot\\Cache");//@"C:\Temp\Cache";
             settings.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.3071.115 Safari/537.36";
 
             if (settings.CefCommandLineArgs.ContainsKey("enable-system-flash"))
@@ -105,24 +115,26 @@ namespace FoE.Farmer.Library.Windows
                 if (!Cef.Initialize(settings))
                     throw new Exception();
 
+#if UI_BROWSER
             Browser = new ChromiumWebBrowser();
-            Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
-
             Browser.WebBrowser = Browser;
             Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
-
+#else
+            Browser = new ChromiumWebBrowser(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
+            Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
+#endif
 
             Browser.BrowserSettings.DefaultEncoding = "UTF-8";
             Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
             Browser.BrowserSettings.WindowlessFrameRate = 60;
 
             Browser.RequestHandler = new RequestHandler();
-            Browser.IsBrowserInitializedChanged += (sender, args) =>
-            {
-                if (Browser.IsBrowserInitialized)
-                {
-                }
-            };
+            //Browser.IsBrowserInitializedChanged += (sender, args) =>
+            //{
+            //    if (Browser.IsBrowserInitialized)
+            //    {
+            //    }
+            //};
             Browser.FrameLoadEnd += (sender, args) =>
             {
                 LoadScripts();
@@ -155,7 +167,9 @@ namespace FoE.Farmer.Library.Windows
             Dispatcher.Invoke(() =>
             {
                 CookieLoaded = false;
-                Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+                //Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+                Browser.Load(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
+
                 AutoStart = true;
             });
         }
@@ -185,9 +199,14 @@ namespace FoE.Farmer.Library.Windows
             }
             LoadRequestString();
 
+            Manager.Log("Success login");
+
             if (AutoStart)
             {
-                SendRequest(Payloads.StartupService.GetData());
+                Task.Delay(3000).ContinueWith((t) =>
+                {
+                    SendRequest(Payloads.StartupService.GetData());
+                }, TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
@@ -235,7 +254,25 @@ namespace FoE.Farmer.Library.Windows
 
         private void StartStopBtn_Click(object sender, RoutedEventArgs e)
         {
-            SendRequest(Payloads.StartupService.GetData());
+            if (ForgeOfEmpires.Manager.IsStarted)
+            {
+                ForgeOfEmpires.Manager.Stop();
+                (sender as Button).Content = "Start";
+            }
+            else
+            {
+                if (ForgeOfEmpires.Manager.IsStartupServicesLoad) ForgeOfEmpires.Manager.Start();
+                else
+                {
+                    if (!CookieLoaded)
+                    {
+                        MessageBox.Show("Wait for login");
+                        return;
+                    }
+                    SendRequest(Payloads.StartupService.GetData());
+                }
+                (sender as Button).Content = "Stop";
+            }
         }
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
@@ -248,7 +285,8 @@ namespace FoE.Farmer.Library.Windows
             AutoStart = ForgeOfEmpires.Manager.IsStarted;
 
             CookieLoaded = false;
-            Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+            //Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+            Browser.Load(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
         }
 
         private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)

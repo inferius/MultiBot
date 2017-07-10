@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.props" Condition="Exists('..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.props')" />
   <Import Project="..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.props" Condition="Exists('..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.props')" />
   <Import Project="..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -195,8 +196,11 @@
     <Error Condition="!Exists('..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.targets'))" />
     <Error Condition="!Exists('..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.props'))" />
     <Error Condition="!Exists('..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.targets'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.targets'))" />
   </Target>
   <Import Project="..\packages\cef.redist.x64.3.2987.1601\build\cef.redist.x64.targets" Condition="Exists('..\packages\cef.redist.x64.3.2987.1601\build\cef.redist.x64.targets')" />
   <Import Project="..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.57.0.0\build\CefSharp.Common.targets')" />
   <Import Project="..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.targets" Condition="Exists('..\packages\CefSharp.Wpf.57.0.0\build\CefSharp.Wpf.targets')" />
+  <Import Project="..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.targets" Condition="Exists('..\packages\CefSharp.OffScreen.57.0.0\build\CefSharp.OffScreen.targets')" />
 </Project>
