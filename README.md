@@ -21,6 +21,7 @@ Collection bot for game Forge of Empires.
 * Automatic access friend
 * Friend request timeout (Protect for non-active users)
   * If you friend request sent, but user not accept at certain time them will be added to black list.
+* Player resource info
 
 **Release download here**
 [MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
