@@ -6,7 +6,7 @@ Based on C# specifically on the WPF and [CefSharp](https://github.com/cefsharp/C
 
 Collection bot for game Forge of Empires.
 
-**Features**
+### Features
 * Collect gold from residental building
   * Automatic sets collection time from residental building production time
 * Collect gold and start production from supplies and goods building
@@ -16,14 +16,17 @@ Collection bot for game Forge of Empires.
 * Aid other users and sit in their tavarn.
 * Automatic relogin when session expires.
 
-**Future build features**
+### Future build features
 * Automatic friend request
 * Automatic access friend
 * Friend request timeout (Protect for non-active users)
   * If you friend request sent, but user not accept at certain time them will be added to black list.
 
-Release download here:
+**Release download here**
 [MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
 
-**Known issues**
+#### Known issues
 In first beta releas you must filled in login data and restart appliaction.
+
+#### Minimal requirements
+[.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
