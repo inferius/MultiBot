@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Cache;
 using System.Windows;
 using System.Windows.Controls;
 using System.Reflection;
@@ -15,6 +16,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using CefSharp;
+using FoE.Farmer.Library.Windows.Events;
 #if UI_BROWSER
 using CefSharp.Wpf;
 #else
@@ -44,20 +46,25 @@ namespace FoE.Farmer.Library.Windows
 
         public MainPage(Window w)
         {
-            InitBrowser();
+            InitSettingBrowser();
             InitializeComponent();
-#if UI_BROWSER
-            BrowserGrid.Children.Add(Browser);
-#else
-            BrowserTabItem.Visibility = Visibility.Collapsed;
-#endif
+
             RequestObject.DataRecived += (o, args) =>
             {
-                payloads[args.Id].TaskSource.SetResult(JArray.Parse(args.Data));
-                ForgeOfEmpires.Manager.ParseStringData(args.Data);
+                if (args.IsError == RecivedDataType.Error)
+                {
+                    Manager.Log(args.Data, LogMessageType.Error);
+                }
+                else
+                {
+                    payloads[args.Id].TaskSource.SetResult(JArray.Parse(args.Data));
+                    ForgeOfEmpires.Manager.ParseStringData(args.Data);
+                }
             };
 
             LoadConfig();
+
+            InitBrowser();
 
             w.Closed += (sender, args) =>
             {
@@ -93,6 +100,11 @@ namespace FoE.Farmer.Library.Windows
 
             Manager.Log("Logging...");
 
+            if (UserName.Text.Length == 0 || Password.Password.Length == 0)
+            {
+                Manager.Log("Login failed. User name or password is empty. Fill in login data and click on Relogin");
+            }
+
             ForgeOfEmpires.Manager.LogoutEvent += (manager, args) =>
             {
                 if (IsReloginRunning) return;
@@ -102,7 +114,7 @@ namespace FoE.Farmer.Library.Windows
 
         }
 
-        public void InitBrowser()
+        private void InitSettingBrowser()
         {
 #if UI_BROWSER
             Cef.EnableHighDPISupport();
@@ -136,16 +148,19 @@ namespace FoE.Farmer.Library.Windows
             if (!Cef.IsInitialized)
                 if (!Cef.Initialize(settings))
                     throw new Exception();
+        }
 
+        private void InitBrowser()
+        {
 #if UI_BROWSER
             Browser = new ChromiumWebBrowser();
             Browser.WebBrowser = Browser;
-            Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
+            Browser.Address = new Uri($"https://{Requests.Domain}/").AbsoluteUri;
 #else
-            Browser = new ChromiumWebBrowser(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
-            Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
+            Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
 #endif
 
+            Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
             Browser.BrowserSettings.DefaultEncoding = "UTF-8";
             Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
             Browser.BrowserSettings.WindowlessFrameRate = 60;
@@ -170,6 +185,12 @@ namespace FoE.Farmer.Library.Windows
 
             };
             //LoadScripts();
+
+#if UI_BROWSER
+            BrowserGrid.Children.Add(Browser);
+#else
+            BrowserTabItem.Visibility = Visibility.Collapsed;
+#endif
         }
 
         private static void LoadScripts()
@@ -200,7 +221,7 @@ namespace FoE.Farmer.Library.Windows
             {
                 CookieLoaded = false;
                 //Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
-                Browser.Load(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
+                Browser.Load(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
 
                 //AutoStart = true;
             });
@@ -290,9 +311,10 @@ namespace FoE.Farmer.Library.Windows
                 Config.SetValue("WorldName", Requests.WorldName);
             }
 
-            if (!IsScriptLoaded && Password.Password.Length > 0 && UserName.Text.Trim().Length > 0 && FrameLoaded)
+            if (Domain.Text.Trim().Length > 0)
             {
-                LoadScripts();
+                Requests.Domain = Domain.Text.Trim();
+                Config.SetValue("Domain", Requests.Domain);
             }
         }
 
@@ -335,7 +357,7 @@ namespace FoE.Farmer.Library.Windows
 
             CookieLoaded = false;
             //Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
-            Browser.Load(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
+            Browser.Load(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
         }
 
         private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)
@@ -404,6 +426,14 @@ namespace FoE.Farmer.Library.Windows
                 WorldName.Text = pwd;
             }
 
+            pwd = Config.GetValue("Domain");
+            if (!string.IsNullOrEmpty(pwd))
+            {
+                Requests.Domain = pwd;
+                Domain.Text = pwd;
+            }
+            
+
             var val = Config.GetValue("GoodsTimer");
             if (!string.IsNullOrEmpty(val))
             {
@@ -458,6 +488,10 @@ namespace FoE.Farmer.Library.Windows
                 Requests.Password = Password.Password;
                 Config.SetValue("Password", pwd);
             }
+
+            Requests.Domain = !string.IsNullOrWhiteSpace(Domain.Text) ? Domain.Text.Trim() : "";
+            Config.SetValue("Domain", Requests.Domain);
+
             var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
             var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
             var residentalTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();

@@ -49,7 +49,7 @@ namespace FoE.Farmer.Library
         public static string IgLastSite { get; set; } = "";
 
         public string RequestsAddress => string.Format(AddressTemplate, Domain, UserKey);
-        internal static string Domain => string.Format(BaseAddress, Server);
+        public static string Domain { get; set; } = "cz.forgeofempires.com";
 
         private readonly Queue<(Payload, Action<JObject>)> payloads = new Queue<(Payload, Action<JObject>)>();
         private Timer requestSendTimer = new Timer(400);

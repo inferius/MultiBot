@@ -58,6 +58,8 @@
                     <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="User name"  x:Name="UserName" TextWrapping="Wrap" Text="" Margin="408,23,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
                     <PasswordBox PasswordChanged="Password_OnPasswordChanged"  controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Password"  x:Name="Password"  Margin="408,62,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
                     <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="World name"  x:Name="WorldName" TextWrapping="Wrap" Text="" Margin="408,103,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
+                    <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Domain (default: cz.forgeofempires.com)"  x:Name="Domain" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True" Margin="408,140,0,0"/>
+
                     <CheckBox Visibility="Collapsed" Content="Auto login after start" IsChecked="True" x:Name="AutoLoginCheck" Width="100" Margin="408,116,0,0" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top"/>
                     <!--<Label Content="User Name" Width="70" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="338,23,0,0" />-->
 

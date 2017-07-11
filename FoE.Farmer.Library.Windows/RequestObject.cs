@@ -18,6 +18,11 @@ namespace FoE.Farmer.Library.Windows
         {
             DataRecived?.Invoke(this, new DataRecivedEventArgs { Data = data, Id = id});
         }
+
+        public void setError(string data)
+        {
+            DataRecived?.Invoke(this, new DataRecivedEventArgs { Data = data, IsError = RecivedDataType.Error});
+        }
         
     }
 }
