@@ -183,6 +183,8 @@ namespace FoE.Farmer.Library
         {
             PickupBuildings();
             TavernAndAidService();
+
+            Services.TreasureHuntService.CheckTreasureHunt();
         }
 
         private void UpdateBuildingInterval()

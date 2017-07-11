@@ -74,6 +74,18 @@ namespace FoE.Farmer.Library
             return fromDate.Value + TimeSpan.FromSeconds(productionTime) + TimeSpan.FromSeconds(randSalt.Next(10, maxSalt));
         }
 
+        public static TimeSpan GetRandomSeconds(int min = 10, int max = 100)
+        {
+            var randSalt = new Random();
+            return TimeSpan.FromSeconds(randSalt.Next(min, max));
+        }
+
+        public static TimeSpan GetRandomMinutes(int min = 3, int max = 15)
+        {
+            var randSalt = new Random();
+            return TimeSpan.FromMinutes(randSalt.Next(min, max));
+        }
+
         public static JToken GetObjectByClass(JArray arr, string _class, string method = null)
         {
             if (arr == null) return null;
