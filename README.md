@@ -1,6 +1,9 @@
 # MultiBot
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VX28FMAVDBV9E&lc=CZ&item_name=Inferius&item_number=FoE%20Bot&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
 
+**Release download here**
+[MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
+
 Forge of Empires Manager
 Based on C# specifically on the WPF and [CefSharp](https://github.com/cefsharp/CefSharp)
 
@@ -22,12 +25,14 @@ Collection bot for game Forge of Empires.
 * Friend request timeout (Protect for non-active users)
   * If you friend request sent, but user not accept at certain time them will be added to black list.
 * Player resource info
-
-**Release download here**
-[MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
-
-#### Known issues
-In first beta releas you must filled in login data and restart appliaction.
+* Treasure Hunt
 
 #### Minimal requirements
 [.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
+
+[Visual C++ Redistributable Packages for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40784)
+
+[Adobe Flash 2.6(Pepper)](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/flashplayer26pp_fa_install.exe)
+
+## Legal
+Violation of any of the terms below will result in the termination of your Account. You agree to use the Service at your own risk.
