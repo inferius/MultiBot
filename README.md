@@ -1,6 +1,9 @@
 # MultiBot
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VX28FMAVDBV9E&lc=CZ&item_name=Inferius&item_number=FoE%20Bot&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
 
+**Release download here**
+[MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
+
 Forge of Empires Manager
 Based on C# specifically on the WPF and [CefSharp](https://github.com/cefsharp/CefSharp)
 
@@ -23,9 +26,6 @@ Collection bot for game Forge of Empires.
   * If you friend request sent, but user not accept at certain time them will be added to black list.
 * Player resource info
 * Treasure Hunt
-
-**Release download here**
-[MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
 
 #### Minimal requirements
 [.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
