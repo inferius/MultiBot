@@ -47,17 +47,16 @@ namespace FoE.Farmer.Library
             }
         }
 
-        public Payload[] Pickup()
+        public async Task<bool> Pickup()
         {
-            if (!CanPickup) return null;
+            if (!CanPickup) return false;
 
             if (Type == BuildType.Residential || Type == BuildType.MainBuilding)
             {
                 ProductionState = ProductionState.IsRunning;
 
                 MinNextPickup = Helper.GenerateNextInterval(ProductionTime);
-                Manager.Log($"Pickup building ID {ID}");
-                return new[] { Payloads.CityProductionService.PickupProduction(new[] { this }) };
+                await Payloads.CityProductionService.PickupProduction(new[] {this}).Send();
             }
             else if (Type == BuildType.Goods || Type == BuildType.Supplies)
             {
@@ -68,24 +67,16 @@ namespace FoE.Farmer.Library
                 MinNextPickup = Helper.GenerateNextInterval(interval, Type);
                 if (oldProdState == ProductionState.Idle)
                 {
-                    Manager.Log($"Building idle ID {ID} and start production");
-                    return new[]
-                    {
-                        Payloads.CityProductionService.StartProduction(this)
-                    };
+                    await Payloads.CityProductionService.StartProduction(this).Send();
                 }
                 else
                 {
-                    Manager.Log($"Pickup building ID {ID} and start production");
-                    return new[]
-                    {
-                        Payloads.CityProductionService.PickupProduction(new[] {this}),
-                        Payloads.CityProductionService.StartProduction(this)
-                    };
+                    await Payloads.CityProductionService.PickupProduction(new[] {this}).Send();
+                    await Payloads.CityProductionService.StartProduction(this).Send();
                 }
             }
 
-            return null;
+            return true;
         }
 
         public static Building LoadFromJSON(JObject j)

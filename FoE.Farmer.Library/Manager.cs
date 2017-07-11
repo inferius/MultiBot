@@ -160,15 +160,23 @@ namespace FoE.Farmer.Library
 
         private void PickupByType(BuildType type)
         {
+            var idleStart = new List<int>();
+            var pickupStart = new List<int>();
+            var onlypickup = new List<int>();
+
             foreach (var building in Me.Buildings.Where(item => item.CanPickup && item.Type == type))
             {
-                var req = building.Pickup();
-                if (req == null) continue;
-                foreach (var payload in req)
-                {
-                    Requests.AddPayload(payload);
-                }
+                if (building.CanPickup)
+                    if (building.Type == BuildType.Residential || building.Type == BuildType.MainBuilding) onlypickup.Add(building.ID);
+                    else if (building.Type == BuildType.Goods || building.Type == BuildType.Supplies)
+                        if (building.ProductionState == ProductionState.Idle) idleStart.Add(building.ID);
+                        else pickupStart.Add(building.ID);
+
+                building.Pickup();
             }
+            if (onlypickup.Count > 0) Log($"Pickup buildings ID: {string.Join(", ", onlypickup)}");
+            if (idleStart.Count > 0) Log($"Idle bulding, only start production ID: {string.Join(", ", idleStart)}");
+            if (pickupStart.Count > 0) Log($"Pickup building and start production ID: {string.Join(", ", pickupStart)}");
         }
 
         public void RunCheckTimer()

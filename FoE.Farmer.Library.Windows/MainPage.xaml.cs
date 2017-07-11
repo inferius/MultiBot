@@ -2,12 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -408,6 +410,15 @@ namespace FoE.Farmer.Library.Windows
                     .FirstOrDefault(r => r.Tag.ToString() == val);
                 if (goodsTimer != null) goodsTimer.IsChecked = true;
             }
+
+            val = Config.GetValue("TavernMinOccupation");
+            if (!string.IsNullOrEmpty(val))
+            {
+                TavernMinOccupation.Text = val;
+                var num = val == "100" ? 1M : decimal.Parse("0." + val, CultureInfo.InvariantCulture);
+                Services.TavernService.MinTaverOccupation = num;
+            }
+
             AutoLoginCheck.IsChecked = Config.GetValueAsBool("AutoLoginAfterStart");
             ConfigLoaded = true;
             UpdateUserInterval();
@@ -447,6 +458,7 @@ namespace FoE.Farmer.Library.Windows
             {
                 Config.SetValue("ResidentalTimer", residentalTimer);
             }
+            Config.SetValue("TavernMinOccupation", TavernMinOccupation.Text.Trim());
 
             Config.SetValue("AutoLoginAfterStart", AutoLoginCheck.IsChecked.Value.ToString());
         }
@@ -459,6 +471,25 @@ namespace FoE.Farmer.Library.Windows
         private void AutoLoginCheck_OnClick(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private string TavernMinOcLastValidText = "75";
+        private void TavernMinOccupation_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var text = TavernMinOccupation.Text.Trim();
+            if (string.IsNullOrWhiteSpace(text)) return;
+            if (Regex.IsMatch(text, "^([0-9]|[1-9][0-9]|100)$"))
+            {
+                
+                TavernMinOcLastValidText = text;
+                var num = text == "100" ? 1M : decimal.Parse("0." + text, CultureInfo.InvariantCulture);
+                Services.TavernService.MinTaverOccupation = num;
+            }
+            else
+            {
+                TavernMinOccupation.Text = TavernMinOcLastValidText;
+                TavernMinOccupation.SelectAll();
+            }
         }
     }
 }

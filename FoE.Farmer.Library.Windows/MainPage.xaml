@@ -64,12 +64,13 @@
                     <!--<Label Content="Password" Width="70" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="338,55,0,0" />-->
 
                     <Label Content="Friend request timeout" Width="135" Margin="0,193,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <TextBlock HorizontalAlignment="Left" Margin="10,213,0,0" TextWrapping="Wrap" FontSize="9" VerticalAlignment="Top">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,216,0,0" TextWrapping="Wrap" FontSize="10" VerticalAlignment="Top" Width="760">
                         <TextBlock.Text>
                             Time in days, which waiting for accept friend request (protect before non-active players). After expiration time friend request it will be cancel and player add to inner friend blacklist.
                         </TextBlock.Text>
                     </TextBlock>
-                    <TextBox controls:TextBoxHelper.Watermark="3 days" HorizontalAlignment="Left" Height="23" Margin="10,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="130"/>
+                    <TextBox controls:TextBoxHelper.Watermark="3 days" HorizontalAlignment="Left" Height="23" Margin="10,247,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="130"/>
+                    <TextBox x:Name="TavernMinOccupation" TextChanged="TavernMinOccupation_OnTextChanged" HorizontalAlignment="Left" Height="36" Margin="10,290,0,0" TextWrapping="Wrap" Text="75" VerticalAlignment="Top" Width="159" controls:TextBoxHelper.UseFloatingWatermark="True" controls:TextBoxHelper.AutoWatermark="True" controls:TextBoxHelper.Watermark="Tavern min occupation in %"/>
 
 
                 </Grid>

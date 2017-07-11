@@ -14,7 +14,7 @@ namespace FoE.Farmer.Library.Services
         public int OccupiedChairs { get; set; } = 0;
         public int BaseSilver { get; set; } = 56;
         public int SilverAdd { get; set; } = 2;
-        public decimal MinTaverOccupation { get; set; } = 0.7M;
+        public static decimal MinTaverOccupation { get; set; } = 0.7M;
         public DateTime MinTavernCheckTime { get; set; } = DateTime.MinValue;
 
         public bool CanCollect
