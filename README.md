@@ -26,9 +26,6 @@ Collection bot for game Forge of Empires.
 **Release download here**
 [MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
 
-#### Known issues
-In first beta releas you must filled in login data and restart appliaction.
-
 #### Minimal requirements
 [.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
 
