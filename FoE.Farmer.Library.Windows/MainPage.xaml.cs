@@ -40,6 +40,7 @@ namespace FoE.Farmer.Library.Windows
         private static bool IsScriptLoaded = false;
         private static bool FrameLoaded = false;
         private static LogMessageType ShowLogMessageType = LogMessageType.AllWithoutRequest;
+        private static bool IsReloginRunning = false;
 
         public MainPage(Window w)
         {
@@ -67,8 +68,12 @@ namespace FoE.Farmer.Library.Windows
                 Environment.Exit(0);
             };
 
-            Requests.PayloadSendRequest += (requests, args) =>
+            var random = new Random();
+            Requests.PayloadSendRequest += async (requests, args) =>
             {
+                var delay = random.Next(50, 400);
+                Manager.Log($"Request delay: {delay}ms", LogMessageType.Request);
+                await Task.Delay(delay);
                 SendRequest(args.Payload);
             };
 
@@ -90,6 +95,8 @@ namespace FoE.Farmer.Library.Windows
 
             ForgeOfEmpires.Manager.LogoutEvent += (manager, args) =>
             {
+                if (IsReloginRunning) return;
+                IsReloginRunning = true;
                 Relogin();
             };
 
@@ -195,7 +202,7 @@ namespace FoE.Farmer.Library.Windows
                 //Browser.Address = new Uri("https://cz.forgeofempires.com/").AbsoluteUri;
                 Browser.Load(new Uri("https://cz.forgeofempires.com/").AbsoluteUri);
 
-                AutoStart = true;
+                //AutoStart = true;
             });
         }
 
@@ -224,15 +231,24 @@ namespace FoE.Farmer.Library.Windows
             }
             LoadRequestString();
 
-            Manager.Log("Success login");
-
-            if (AutoStart)
+            // after relogin must start timer
+            if (IsReloginRunning)
             {
-                Task.Delay(3000).ContinueWith((t) =>
+                Manager.Log("Timer start");
+                ForgeOfEmpires.Manager.Start();
+            }
+
+            if (AutoStart && !IsReloginRunning)
+            {
+                Task.Delay(2000).ContinueWith((t) =>
                 {
                     SendRequest(Payloads.StartupService.GetData());
+                    Manager.Log("Success login. (StartupService)");
                 }, TaskContinuationOptions.ExecuteSynchronously);
             }
+            else Manager.Log("Success login");
+
+            IsReloginRunning = false;
         }
 
         private static void LoadRequestString()

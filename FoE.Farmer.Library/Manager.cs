@@ -123,19 +123,19 @@ namespace FoE.Farmer.Library
             if (NextMinGoodsTime < DateTime.Now)
             {
                 PickupByType(BuildType.Goods);
-                NextMinGoodsTime = Helper.GenerateNextInterval((int)_userIntervalGoods, BuildType.Goods);
+                NextMinGoodsTime = Helper.GenerateNextInterval((int)UserIntervalGoods, BuildType.Goods);
                 Log($"Next time for pickup, Goods: {NextMinGoodsTime.ToLocalTime()}");
             }
             if (NextMinResidentalTime < DateTime.Now)
             {
                 PickupByType(BuildType.Residential);
-                NextMinResidentalTime = Helper.GenerateNextInterval((int)_userIntervalGoods, BuildType.Residential);
+                NextMinResidentalTime = Helper.GenerateNextInterval((int)UserIntervalSupplies, BuildType.Residential);
                 Log($"Next time for pickup, Residental: {NextMinResidentalTime.ToLocalTime()}");
             }
             if (NextMinSuppliesTime < DateTime.Now)
             {
                 PickupByType(BuildType.Supplies);
-                NextMinSuppliesTime = Helper.GenerateNextInterval((int)_userIntervalGoods, BuildType.Supplies);
+                NextMinSuppliesTime = Helper.GenerateNextInterval((int)UserIntervalResidental, BuildType.Supplies);
                 Log($"Next time for pickup, Supplies: {NextMinSuppliesTime.ToLocalTime()}");
             }
 
@@ -188,6 +188,7 @@ namespace FoE.Farmer.Library
         private void UpdateBuildingInterval()
         {
             if (!IsInitialized) return;
+            if (Me == null) return;
 
             foreach (var building in Me.Buildings)
             {

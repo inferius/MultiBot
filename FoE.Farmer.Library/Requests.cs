@@ -52,10 +52,12 @@ namespace FoE.Farmer.Library
         internal static string Domain => string.Format(BaseAddress, Server);
 
         private readonly Queue<(Payload, Action<JObject>)> payloads = new Queue<(Payload, Action<JObject>)>();
-        private Timer requestSendTimer = new Timer(500);
+        private Timer requestSendTimer = new Timer(400);
 
         public Requests()
         {
+            var random = new Random();
+            requestSendTimer.Interval = random.Next(400, 600);
             requestSendTimer.Elapsed += (e,s) => SendPayload();
             //requestSendTimer.Start();
         }
@@ -75,7 +77,8 @@ namespace FoE.Farmer.Library
             var item = payloads.Dequeue();
             if (item.Item1.TaskSource.Task.IsCanceled) return;
 
-            PayloadSendRequest?.Invoke(this, new PayloadRequestEventArgs { Payload = item.Item1 });
+            
+            PayloadSendRequest?.Invoke(this, new PayloadRequestEventArgs {Payload = item.Item1});
         }
 
         public static string BuildSignature(string data)
