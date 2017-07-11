@@ -14,6 +14,7 @@ Collection bot for game Forge of Empires.
 * Collect tavern silver
   * The user sets the minimum number of chairs that are occupied. In percent.
 * Aid other users and sit in their tavarn.
+* Automatic relogin with session timeout.
 
 **Future build features**
 * Automatic friend request
