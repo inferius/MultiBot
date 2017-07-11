@@ -31,5 +31,7 @@ In first beta releas you must filled in login data and restart appliaction.
 
 #### Minimal requirements
 [.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
+
 [Visual C++ Redistributable Packages for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40784)
+
 [Adobe Flash 2.6(Pepper)](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/flashplayer26pp_fa_install.exe)
