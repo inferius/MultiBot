@@ -129,13 +129,13 @@ namespace FoE.Farmer.Library
             if (NextMinResidentalTime < DateTime.Now)
             {
                 PickupByType(BuildType.Residential);
-                NextMinResidentalTime = Helper.GenerateNextInterval((int)UserIntervalSupplies, BuildType.Residential);
-                Log($"Next time for pickup, Residental: {NextMinResidentalTime.ToLocalTime()}");
+                NextMinResidentalTime = Helper.GenerateNextInterval((int)UserIntervalResidental, BuildType.Residential);
+                Log($"Next time check residental pickup {NextMinResidentalTime.ToLocalTime()}");
             }
             if (NextMinSuppliesTime < DateTime.Now)
             {
                 PickupByType(BuildType.Supplies);
-                NextMinSuppliesTime = Helper.GenerateNextInterval((int)UserIntervalResidental, BuildType.Supplies);
+                NextMinSuppliesTime = Helper.GenerateNextInterval((int)UserIntervalSupplies, BuildType.Supplies);
                 Log($"Next time for pickup, Supplies: {NextMinSuppliesTime.ToLocalTime()}");
             }
 
