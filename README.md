@@ -23,3 +23,6 @@ Collection bot for game Forge of Empires.
 
 Release download here:
 [MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
+
+**Known issues**
+In first beta releas you must filled in login data and restart appliaction.
