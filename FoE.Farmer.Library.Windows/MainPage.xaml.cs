@@ -35,6 +35,7 @@ namespace FoE.Farmer.Library.Windows
     {
         public static Config Config = new Config("FoE.Config.xml");
         private static ChromiumWebBrowser Browser;
+        //private static CefSharp.Wpf.ChromiumWebBrowser otherBrowser;
         private static bool CookieLoaded = false;
         private static Dictionary<string, Payload> payloads = new Dictionary<string, Payload>();
         private static bool ConfigLoaded = false;
@@ -43,11 +44,14 @@ namespace FoE.Farmer.Library.Windows
         private static bool FrameLoaded = false;
         private static LogMessageType ShowLogMessageType = LogMessageType.AllWithoutRequest;
         private static bool IsReloginRunning = false;
+        private static readonly string TempFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft", "FoEBot");
+        private bool IsOtherBrowserInit = false;
 
         public MainPage(Window w)
         {
             InitSettingBrowser();
             InitializeComponent();
+            Directory.CreateDirectory(TempFolder);
 
             RequestObject.DataRecived += (o, args) =>
             {
@@ -64,6 +68,8 @@ namespace FoE.Farmer.Library.Windows
 
             LoadConfig();
 
+            LoadOtherResourcesHtml();
+
             InitBrowser();
 
             w.Closed += (sender, args) =>
@@ -73,6 +79,7 @@ namespace FoE.Farmer.Library.Windows
                 Config.Save();
                 Cef.Shutdown();
                 Environment.Exit(0);
+                if (File.Exists(Path.Combine(TempFolder, "OtherResources.html"))) File.Delete(Path.Combine(TempFolder, "OtherResources.html"));
             };
 
             var random = new Random();
@@ -110,6 +117,23 @@ namespace FoE.Farmer.Library.Windows
                 if (IsReloginRunning) return;
                 IsReloginRunning = true;
                 Relogin();
+            };
+
+            ForgeOfEmpires.Manager.ResourcesUpdate += (manager, args) =>
+            {
+                foreach (var value in args.Values)
+                {
+                    switch (value.Item1)
+                    {
+                        //case "tavern_silver": TavernSilver.Dispatcher.Invoke(() => TavernSilver.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        //case "premium": DiamondBox.Dispatcher.Invoke(() => DiamondBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        //case "money": MoneyBox.Dispatcher.Invoke(() => MoneyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        //case "supplies": SupplyBox.Dispatcher.Invoke(() => SupplyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        //case "strategy_points": ForgePointsBox.Dispatcher.Invoke(() => ForgePointsBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        //case "medals": Medals.Dispatcher.Invoke(() => Medals.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                        default: otherBrowser.ExecuteScriptAsync("updateItem", value.Item1, value.Item2); break;
+                    }
+                }
             };
 
         }
@@ -150,6 +174,26 @@ namespace FoE.Farmer.Library.Windows
                     throw new Exception();
         }
 
+        private void InitOtherBrowser()
+        {
+            if (IsOtherBrowserInit) return;
+            IsOtherBrowserInit = true;
+            //otherBrowser = new CefSharp.Wpf.ChromiumWebBrowser();
+            otherBrowser.WebBrowser = otherBrowser;
+            //otherBrowser.Address = new Uri("http://api.michalosoft.cz/ResourceService.html").AbsoluteUri;
+            otherBrowser.Address = new Uri(Path.Combine(TempFolder, "OtherResources.html")).AbsoluteUri;
+
+            otherBrowser.BrowserSettings.DefaultEncoding = "UTF-8";
+            otherBrowser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
+            otherBrowser.BrowserSettings.WindowlessFrameRate = 30;
+            //otherBrowser.Margin = new Thickness(10, 113, 10.4, 10.4);
+            otherBrowser.Width = double.NaN;
+            otherBrowser.Height = double.NaN;
+
+            ForegroundGrid.Children.Remove(otherBrowser);
+            ResourceInfoGrid.Children.Add(otherBrowser);
+        }
+
         private void InitBrowser()
         {
 #if UI_BROWSER
@@ -159,11 +203,24 @@ namespace FoE.Farmer.Library.Windows
 #else
             Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
 #endif
+            ////otherBrowser = new CefSharp.Wpf.ChromiumWebBrowser();
+            //otherBrowser.WebBrowser = otherBrowser;
+            ////otherBrowser.Address = new Uri("http://api.michalosoft.cz/ResourceService.html").AbsoluteUri;
+            //otherBrowser.Address = new Uri(Path.Combine(TempFolder, "OtherResources.html")).AbsoluteUri;
+
+            //otherBrowser.BrowserSettings.DefaultEncoding = "UTF-8";
+            //otherBrowser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
+            //otherBrowser.BrowserSettings.WindowlessFrameRate = 30;
+            //otherBrowser.Margin = new Thickness(10, 113, 10.4, 10.4);
+            //otherBrowser.Width = double.NaN;
+            //otherBrowser.Height = double.NaN;
+
+            //ResourceInfoGrid.Children.Add(otherBrowser);
 
             Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
             Browser.BrowserSettings.DefaultEncoding = "UTF-8";
             Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
-            Browser.BrowserSettings.WindowlessFrameRate = 60;
+            Browser.BrowserSettings.WindowlessFrameRate = 30;
 
             Browser.RequestHandler = new RequestHandler();
             //Browser.IsBrowserInitializedChanged += (sender, args) =>
@@ -213,6 +270,22 @@ namespace FoE.Farmer.Library.Windows
 
             //Browser.ExecuteScriptAsync()
 
+        }
+
+        private void LoadOtherResourcesHtml()
+        {
+            //otherBrowser.Load("http://api.michalosoft.cz/ResourceService.html");
+            //return;
+            var assembly = Assembly.GetExecutingAssembly();
+            const string resourceName = "FoE.Farmer.Library.Windows.External.OtherResources.html";
+
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
+            {
+                var result = reader.ReadToEnd();
+                File.WriteAllText(Path.Combine(TempFolder, "OtherResources.html"), result);
+                //otherBrowser.LoadHtml(result, "http://www.example.com/");
+            }
         }
 
         public void Relogin()
@@ -320,6 +393,8 @@ namespace FoE.Farmer.Library.Windows
 
         private void StartStopBtn_Click(object sender, RoutedEventArgs e)
         {
+            InitOtherBrowser();
+
             if (ForgeOfEmpires.Manager.IsStarted)
             {
                 ForgeOfEmpires.Manager.Stop();
@@ -539,6 +614,14 @@ namespace FoE.Farmer.Library.Windows
             {
                 TavernMinOccupation.Text = TavernMinOcLastValidText;
                 TavernMinOccupation.SelectAll();
+            }
+        }
+
+        private void DevToolButtonInner_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (otherBrowser.IsBrowserInitialized)
+            {
+                otherBrowser.ShowDevTools();
             }
         }
     }

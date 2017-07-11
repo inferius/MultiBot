@@ -7,11 +7,10 @@
       xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
       xmlns:local="clr-namespace:FoE.Farmer.Library.Windows"
       mc:Ignorable="d" 
-      d:DesignHeight="600" d:DesignWidth="800"
+      d:DesignHeight="768" d:DesignWidth="1024"
       Title="MainPage">
 
     <Grid>
-
         <TabControl Margin="1,0,-1,0">
             <TabItem Header="Log">
                 <Grid>
@@ -23,6 +22,15 @@
                             </Paragraph>
                         </FlowDocument>
                     </RichTextBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Resource info">
+                <Grid x:Name="ResourceInfoGrid">
+                    <!--<WebBrowser x:Name="OtherResourcesBrowser" Margin="10,113,10.4,10.4"/>-->
+                    <!--<cefSharp:ChromiumWebBrowser x:Name="OtherResourcesBrowser" Address=""  Margin="10,113,10.4,10.4"></cefSharp:ChromiumWebBrowser>-->
+                    <Button Visibility="Hidden" x:Name="DevToolButtonInner" Click="DevToolButtonInner_OnClick" Content="Button" HorizontalAlignment="Left" Margin="864,6,0,0" VerticalAlignment="Top" Width="75"/>
+
+
                 </Grid>
             </TabItem>
             <TabItem Header="Browser" x:Name="BrowserTabItem">
@@ -83,9 +91,14 @@
                 </Grid>
             </TabItem>
 
+
         </TabControl>
         <Button Click="ButtonBase_OnClick" Content="DevTools" Margin="0,2,5.6,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"/>
         <Button Click="ButtonBase1_OnClick"  Content="Relogin" Margin="0,2,85.6,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"/>
+        <Grid x:Name="ForegroundGrid" Width="1" Height="1">
+            <cefSharp:ChromiumWebBrowser x:Name="otherBrowser" Width="1" Height="1"></cefSharp:ChromiumWebBrowser>
+        </Grid>
+
 
     </Grid>
 </Page>

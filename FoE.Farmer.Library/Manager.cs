@@ -7,6 +7,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Flurl.Util;
 using FoE.Farmer.Library.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,6 +21,9 @@ namespace FoE.Farmer.Library
 
         public event LogoutEventHandler LogoutEvent;
         public delegate void LogoutEventHandler(Manager m, Events.LogoutEvent e);
+
+        public event ResourceUpdateEventArgsHandler ResourcesUpdate;
+        public delegate void ResourceUpdateEventArgsHandler(Manager m, Events.ResourceUpdateEventArgs e);
 
         private JObject Config = new JObject();
         public static JObject Cache = new JObject();
@@ -277,6 +281,38 @@ namespace FoE.Farmer.Library
                         else if (j["requestMethod"].ToString() == "getOwnTavern")
                         {
                             Me.Tavern.Parse(j);
+                        }
+                        break;
+                    case "ResourceService":
+                        if (j["requestMethod"].ToString() == "getPlayerResources")
+                        {
+                            var res = new List<(string, int)>();
+                            var resArray = j["responseData"]["resources"] as JObject;
+                            if (resArray != null)
+                            {
+                                foreach (var oneRes in resArray)
+                                {
+                                    if (oneRes.Key.StartsWith("raw_")) continue;
+
+                                    switch (oneRes.Key)
+                                    {
+                                        case "carnival_roses":
+                                        case "negotiation_game_turn":
+                                        case "population":
+                                        case "expansions":
+                                        case "guild_expedition_attempt":
+                                        case "summer_tickets":
+                                        case "spring_lanterns":
+                                        case "stars":
+                                            break;
+                                        default:
+                                            res.Add((oneRes.Key, oneRes.Value.ToObject<int>()));
+                                            break;
+                                    }
+                                }
+
+                                ResourcesUpdate?.Invoke(this, new ResourceUpdateEventArgs {Values = res.ToArray()});
+                            }
                         }
                         break;
                     case "ResearchService":
