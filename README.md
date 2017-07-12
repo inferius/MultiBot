@@ -18,14 +18,20 @@ Collection bot for game Forge of Empires.
   * The user sets the minimum number of chairs that are occupied. In percent.
 * Aid other users and sit in their tavarn.
 * Automatic relogin when session expires.
-
-### Future build features
-* Automatic friend request
-* Automatic access friend
-* Friend request timeout (Protect for non-active users)
-  * If you friend request sent, but user not accept at certain time them will be added to black list.
 * Player resource info
 * Treasure Hunt
+
+### Future build features
+* Friend manager
+  * Automatic friend request
+  * Automatic access friend
+  * Friend request timeout (Protect for non-active users)
+    * If you friend request sent, but user not accept at certain time them will be added to black list.
+  * Non-active user protection
+    * When user no aid or no tavern sit on interval will be remove from friends, but you set exception :)
+* Trade manager
+  * if you need certain goods sets conditions of trade and we automatic find them
+  * if you need goods for research completion automatic market check + automatic forge points buy on trade
 
 #### Minimal requirements
 [.NET Framework 4.7](https://www.microsoft.com/en-us/download/details.aspx?id=55170)
