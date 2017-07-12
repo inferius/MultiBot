@@ -59,6 +59,7 @@ namespace FoE.Farmer.Library.Services
                 {
                     if (p_cache["NextHelp"] != null) p.NextHelp = p_cache["NextHelp"].ToObject<DateTime>();
                     if (p_cache["TavernNextCheck"] != null) p.Tavern.MinTavernCheckTime = p_cache["TavernNextCheck"].ToObject<DateTime>();
+                    p_cache["Name"] = p.Name;
                 }
 
                 if (!isFriend && !isInvited) p.IsFriend = FriendStatus.NoFriend;
