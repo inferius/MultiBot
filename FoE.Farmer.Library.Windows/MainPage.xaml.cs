@@ -217,7 +217,7 @@ namespace FoE.Farmer.Library.Windows
 
             //ResourceInfoGrid.Children.Add(otherBrowser);
 
-            Browser.RegisterAsyncJsObject("responseManager", new RequestObject());
+            Browser.RegisterAsyncJsObject(AP._f("responseManager"), new RequestObject());
             Browser.BrowserSettings.DefaultEncoding = "UTF-8";
             Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
             Browser.BrowserSettings.WindowlessFrameRate = 30;
@@ -260,12 +260,19 @@ namespace FoE.Farmer.Library.Windows
             using (var stream = assembly.GetManifestResourceStream(resourceName))
             using (var reader = new StreamReader(stream))
             {
-                var result = reader.ReadToEnd();
+                var result = new StringBuilder(reader.ReadToEnd());
                 var wn = Requests.WorldName == null ? "null" : $"'{Requests.WorldName}'";
-                result =
-                    $"var FoELoginUserName = '{Requests.UserName}'; var FoELoginPassword = '{Requests.Password}'; var FoEWordName = {wn};" +
-                    result;
-                Browser.ExecuteScriptAsync(result);
+
+                result.Insert(0, $"var FoELoginUserName = '{Requests.UserName}'; var FoELoginPassword = '{Requests.Password}'; var FoEWordName = {wn};");
+                result.Replace("FoELoginUserName", AP._f("FoELoginUserName"));
+                result.Replace("FoELoginPassword", AP._f("FoELoginPassword"));
+                result.Replace("FoEWordName", AP._f("FoEWordName"));
+                result.Replace("FoEInit", AP._f("FoEInit"));
+                result.Replace("FoELogin", AP._f("FoELogin"));
+                result.Replace("FoFTimer", AP._f("FoFTimer"));
+                result.Replace("FoEPlay", AP._f("FoEPlay"));
+
+                Browser.ExecuteScriptAsync(result.ToString());
             }
 
             //Browser.ExecuteScriptAsync()
@@ -348,7 +355,7 @@ namespace FoE.Farmer.Library.Windows
         private static void LoadRequestString()
         {
 
-            var FncSend = "function sendRequest(data, signature){return new Promise((r, c) => {$.ajax({type: 'POST',url: '/game/json?h=" + Requests.UserKey + "', data: data, contentType: 'application/json', dataType: 'json', beforeSend: (xhr) => {" +
+            var FncSend = "function "+ AP._f("sendRequest") + "(data, signature){return new Promise((r, c) => {$.ajax({type: 'POST',url: '/game/json?h=" + Requests.UserKey + "', data: data, contentType: 'application/json', dataType: 'json', beforeSend: (xhr) => {" +
                           "xhr.setRequestHeader('Signature', signature);" +
                           $"xhr.setRequestHeader('Client-Identification', '{Requests.TemplateRequestHeader["Client-Identification"]}');" +
                           $"xhr.setRequestHeader('X-Requested-With', '{Requests.TemplateRequestHeader["X-Requested-With"]}');" +
@@ -363,7 +370,7 @@ namespace FoE.Farmer.Library.Windows
             Manager.Log("Request sent: " + payload.ToString(), LogMessageType.Request);
             var data = "[" + payload + "]";
             var signature = Requests.BuildSignature(data);
-            var script = $"(async () => responseManager.setData(JSON.stringify(await sendRequest('{data}', '{signature}')), '{signature}') )();";
+            var script = $"(async () => {AP._f("responseManager")}.setData(JSON.stringify(await {AP._f("sendRequest")}('{data}', '{signature}')), '{signature}') )();";
 
             payloads.Add(signature, payload);
             await Browser.EvaluateScriptAsync(script);

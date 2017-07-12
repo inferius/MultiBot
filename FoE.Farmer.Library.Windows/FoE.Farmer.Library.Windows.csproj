@@ -116,6 +116,7 @@
       <DependentUpon>DebugWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Events\DataRecived.cs" />
+    <Compile Include="Helpers\AntiProtect.cs" />
     <Compile Include="Helpers\Image.cs" />
     <Compile Include="Helpers\StringCrypto.cs" />
     <Compile Include="RequestHandler.cs" />

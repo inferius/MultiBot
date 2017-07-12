@@ -41,7 +41,8 @@ namespace FoE.Farmer.Library.Services
                         var nextTravelTime = chest["travel_time"].ToObject<int>();
                         NextCheckTime = DateTime.Now + TimeSpan.FromSeconds(nextTravelTime) + Helper.GetRandomMinutes(2, 8);
                         Manager.Log($"- Treasure hunt - collected rewards, Traveling to next (chest no. {i+2}): {NextCheckTime.ToLocalTime()}");
-                    } 
+                    }
+                    await Payloads.TreasureHuntService.CollectTreasure().Send();
                     return;
                 }
                 if (chest["state"]["__class__"].ToString() == "TreasureChestTraveling")

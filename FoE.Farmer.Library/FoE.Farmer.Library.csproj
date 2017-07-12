@@ -113,6 +113,7 @@
     <Compile Include="Payloads\ResourceService.cs" />
     <Compile Include="Payloads\StartupServices.cs" />
     <Compile Include="Payloads\TavernService.cs" />
+    <Compile Include="Payloads\TradeService.cs" />
     <Compile Include="Payloads\TreasureHuntService.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
