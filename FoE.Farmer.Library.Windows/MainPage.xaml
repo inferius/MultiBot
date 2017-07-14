@@ -33,6 +33,16 @@
 
                 </Grid>
             </TabItem>
+            <TabItem Header="Research">
+                <Grid>
+                    
+                </Grid>
+            </TabItem>
+            <TabItem Header="Trade manager">
+                <Grid>
+
+                </Grid>
+            </TabItem>
             <TabItem Header="Browser" x:Name="BrowserTabItem">
                 <Grid x:Name="BrowserGrid">
                     <!--<cefSharp:ChromiumWebBrowser x:Name="Browser"></cefSharp:ChromiumWebBrowser>-->

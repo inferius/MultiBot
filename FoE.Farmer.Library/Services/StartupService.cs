@@ -41,30 +41,9 @@ namespace FoE.Farmer.Library.Services
 
             foreach (var item in j as JArray)
             {
-                var isFriend = item["is_friend"]?.ToObject<bool>() ?? false;
-                var isInvited = item["is_invited"]?.ToObject<bool>() ?? false;
-                
+                var p = new Player();
+                p.Parse(item);
 
-                var p = new Player
-                {
-                    IsSelf = item["is_self"].ToObject<bool>(),
-                    IsNeighbour = item["is_neighbor"]?.ToObject<bool>() ?? false,
-                    IsGuildMember = item["is_guild_member"]?.ToObject<bool>() ?? false,
-                    ID = item["player_id"].ToObject<int>(),
-                    NextHelp = item["next_interaction_in"] != null ? DateTime.Now + TimeSpan.FromSeconds(item["next_interaction_in"].ToObject<int>()) : DateTime.Now
-                };
-
-                var p_cache = ForgeOfEmpires.Manager.CurrentCache["Players"][p.ID.ToString()];
-                if (p_cache != null)
-                {
-                    if (p_cache["NextHelp"] != null) p.NextHelp = p_cache["NextHelp"].ToObject<DateTime>();
-                    if (p_cache["TavernNextCheck"] != null) p.Tavern.MinTavernCheckTime = p_cache["TavernNextCheck"].ToObject<DateTime>();
-                    p_cache["Name"] = p.Name;
-                }
-
-                if (!isFriend && !isInvited) p.IsFriend = FriendStatus.NoFriend;
-                else if (isFriend) p.IsFriend = FriendStatus.Friend;
-                else if (isInvited) p.IsFriend = FriendStatus.FriendRequest;
                 ForgeOfEmpires.Manager.Players.Add(p);
             }
             

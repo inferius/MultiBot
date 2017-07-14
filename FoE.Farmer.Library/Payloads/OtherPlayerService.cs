@@ -40,5 +40,18 @@ namespace FoE.Farmer.Library.Payloads
                 RequestData = new JArray(player.ID)
             };
         }
+
+        /// <summary>
+        /// Nacte seznam pratel
+        /// </summary>
+        /// <returns></returns>
+        public static Payload GetFriendsList()
+        {
+            return new Payload
+            {
+                RequestClass = ClassName,
+                RequestMethod = "getFriendsList"
+            };
+        }
     }
 }

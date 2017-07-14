@@ -225,6 +225,8 @@ namespace FoE.Farmer.Library
             }
 
             RunCheckTimer();
+            //await Task.Delay(1000);
+            //await Payloads.OtherPlayerService.GetFriendsList().Send();
             _timer.Start();
             IsStarted = true;
         }
@@ -319,6 +321,28 @@ namespace FoE.Farmer.Library
                         // Research saervice
                         break;
                     case "OtherPlayerService":
+                        if (j["requestMethod"].ToString() == "getFriendsList")
+                        {
+                            var friends = j["responseData"] as JArray;
+
+                            var i = 0;
+                            foreach (var friend in friends)
+                            {
+                                var id = friend["player_id"]?.ToObject<int>() ?? -1;
+                                if (id < 0) Log("Player id is not valid", LogMessageType.Warning);
+                                var p = GetPlayerById(id);
+                                if (p != null) p.Parse(friend);
+                                else
+                                {
+                                    i++;
+                                    p = new Player();
+                                    p.Parse(friend);
+                                    Players.Add(p);
+                                }
+
+                            }
+                            Log("Freinds player add " + i, LogMessageType.Debug);
+                        }
                         // player and friend service
                         break;
                     case "StartupService":

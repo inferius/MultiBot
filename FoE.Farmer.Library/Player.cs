@@ -41,7 +41,7 @@ namespace FoE.Farmer.Library
         {
             if (CanAidable)
             {
-                NextHelp = DateTime.Now + TimeSpan.FromHours(24);
+                NextHelp = DateTime.Now + TimeSpan.FromHours(24) + Helper.GetRandomMinutes(20, 60);
                 OtherPlayerService.PolivateRandomBuilding(this).Send();
                 SetCache("NextHelp", NextHelp);
             }
@@ -57,6 +57,36 @@ namespace FoE.Farmer.Library
             if (Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()] == null) Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()] = new JObject();
             Manager.Cache[ForgeOfEmpires.Manager.Me.ID.ToString()]["Players"][ID.ToString()][attr] = value;
         }
+
+        public void Parse(JToken j)
+        {
+            ID = j["player_id"].ToObject<int>();
+
+            var nextInter = j["next_interaction_in"]?.ToObject<int>() ?? 0;
+
+            var isFriend = j["is_friend"]?.ToObject<bool>() ?? false;
+            var isInvited = j["is_invited"]?.ToObject<bool>() ?? false;
+
+
+            Name = j["name"].ToObject<string>();
+            IsSelf = j["is_self"].ToObject<bool>();
+            IsNeighbour = j["is_neighbor"]?.ToObject<bool>() ?? false;
+            IsGuildMember = j["is_guild_member"]?.ToObject<bool>() ?? false;
+            ID = j["player_id"].ToObject<int>();
+            NextHelp = DateTime.Now + TimeSpan.FromSeconds(j["next_interaction_in"]?.ToObject<int>() ?? 0);
+
+            var p_cache = ForgeOfEmpires.Manager.CurrentCache["Players"][ID.ToString()];
+            if (p_cache != null)
+            {
+                if (p_cache["NextHelp"] != null) NextHelp = p_cache["NextHelp"].ToObject<DateTime>();
+                if (p_cache["TavernNextCheck"] != null) Tavern.MinTavernCheckTime = p_cache["TavernNextCheck"].ToObject<DateTime>();
+                p_cache["Name"] = Name;
+            }
+
+            if (!isFriend && !isInvited) IsFriend = FriendStatus.NoFriend;
+            else if (isFriend) IsFriend = FriendStatus.Friend;
+            else if (isInvited) IsFriend = FriendStatus.FriendRequest;
+        }
     }
 
     public enum FriendStatus
@@ -64,6 +94,7 @@ namespace FoE.Farmer.Library
         Friend,
         NoFriend,
         FriendRequest,
+        IncomingFriendRequest,
         BlackList
     }
 }

@@ -108,6 +108,7 @@
     <Compile Include="Payload.cs" />
     <Compile Include="PayloadManager.cs" />
     <Compile Include="Payloads\CityProductionService.cs" />
+    <Compile Include="Payloads\FirendService.cs" />
     <Compile Include="Payloads\OtherPlayerService.cs" />
     <Compile Include="Payloads\ResearchService.cs" />
     <Compile Include="Payloads\ResourceService.cs" />
