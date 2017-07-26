@@ -120,7 +120,7 @@ namespace FoE.Farmer.Library
                     return null;
             }
 
-            if (b.Type == BuildType.Residential || b.Type == BuildType.MainBuilding) b.ProductionTime = j["state"]["current_product"]["production_time"].ToObject<int>();
+            if (b.Type == BuildType.Residential || b.Type == BuildType.MainBuilding) b.ProductionTime = j["state"]["current_product"]?["production_time"]?.ToObject<int>() ?? 300;
 
             return b;
         }
