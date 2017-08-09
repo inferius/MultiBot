@@ -200,11 +200,11 @@ namespace FoE.Farmer.Library
             {
                 if (building.Type == BuildType.Goods) building.Interval = (int)_userIntervalGoods;
                 if (building.Type == BuildType.Supplies) building.Interval = (int)_userIntervalSupplies;
-                if (building.Type == BuildType.Residential) building.Interval = (int)_userIntervalResidental;
+                if (building.Type == BuildType.Residential) building.Interval = 300; //(int)_userIntervalResidental;
             }
         }
 
-        private void StartupService()
+        private async void StartupService()
         {
             IsStartupServicesLoad = true;
             // Load cache
@@ -223,7 +223,7 @@ namespace FoE.Farmer.Library
                 _nextMinResidentalTime = CurrentCache["NextMinResidentalTime"].ToObject<DateTime>();
                 Log($"Next residental pickup loaded from cache: {NextMinResidentalTime.ToLocalTime()}");
             }
-
+            await Payloads.OtherPlayerService.GetFriendsList().Send();
             RunCheckTimer();
             //await Task.Delay(1000);
             //await Payloads.OtherPlayerService.GetFriendsList().Send();
@@ -341,11 +341,19 @@ namespace FoE.Farmer.Library
                                 }
 
                             }
-                            Log("Freinds player add " + i, LogMessageType.Debug);
+                            Log("Freinds player load " + i, LogMessageType.Debug);
                         }
                         // player and friend service
                         break;
                     case "StartupService":
+                        try
+                        {
+                            File.WriteAllText("last_startup_data.log", j.ToString(Formatting.Indented));
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
                         Services.StartupService.Parse(j["responseData"] as JObject);
                         StartupService();
                         Me.Tavern.UnlockedChairs = taverUnlocked;
