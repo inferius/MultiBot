@@ -97,7 +97,7 @@ namespace FoE.Farmer.Library
 
             b.ID = j["id"].ToObject<int>();
             b.MinNextPickup = DateTime.MaxValue;
-            b.Position = (j["x"].ToObject<int>(), j["y"].ToObject<int>());
+            b.Position = (j["x"]?.ToObject<int>() ?? 0, j["y"]?.ToObject<int>() ?? 0);
 
             switch (j["state"]["__class__"].ToString())
             {

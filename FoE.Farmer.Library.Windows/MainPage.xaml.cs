@@ -121,18 +121,27 @@ namespace FoE.Farmer.Library.Windows
 
             ForgeOfEmpires.Manager.ResourcesUpdate += (manager, args) =>
             {
-                foreach (var value in args.Values)
+                try
                 {
-                    switch (value.Item1)
+                    foreach (var value in args.Values)
                     {
-                        //case "tavern_silver": TavernSilver.Dispatcher.Invoke(() => TavernSilver.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        //case "premium": DiamondBox.Dispatcher.Invoke(() => DiamondBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        //case "money": MoneyBox.Dispatcher.Invoke(() => MoneyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        //case "supplies": SupplyBox.Dispatcher.Invoke(() => SupplyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        //case "strategy_points": ForgePointsBox.Dispatcher.Invoke(() => ForgePointsBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        //case "medals": Medals.Dispatcher.Invoke(() => Medals.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
-                        default: otherBrowser.ExecuteScriptAsync("updateItem", value.Item1, value.Item2); break;
+                        switch (value.Item1)
+                        {
+                            //case "tavern_silver": TavernSilver.Dispatcher.Invoke(() => TavernSilver.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            //case "premium": DiamondBox.Dispatcher.Invoke(() => DiamondBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            //case "money": MoneyBox.Dispatcher.Invoke(() => MoneyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            //case "supplies": SupplyBox.Dispatcher.Invoke(() => SupplyBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            //case "strategy_points": ForgePointsBox.Dispatcher.Invoke(() => ForgePointsBox.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            //case "medals": Medals.Dispatcher.Invoke(() => Medals.Text = value.Item2.ToString(CultureInfo.CurrentUICulture)); break;
+                            default:
+                                otherBrowser.ExecuteScriptAsync("updateItem", value.Item1, value.Item2);
+                                break;
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    Manager.Log("Resource update Exception: " + e.ToString(), LogMessageType.Exception);
                 }
             };
 

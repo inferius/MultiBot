@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define DEBUG_STARTUP
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -354,7 +356,17 @@ namespace FoE.Farmer.Library
                         {
                             // ignored
                         }
-                        Services.StartupService.Parse(j["responseData"] as JObject);
+                        var data_j = j["responseData"] as JObject;
+#if DEBUG_STARTUP
+                        var data_f = File.ReadAllText("debug_startup.json");
+                        data_j = JObject.Parse(data_f);
+                        data_j = data_j["responseData"] as JObject;
+#endif
+                        Services.StartupService.Parse(data_j);
+#if DEBUG_STARTUP
+                        Log("Succes load startup data");
+                        return;
+#endif
                         StartupService();
                         Me.Tavern.UnlockedChairs = taverUnlocked;
                         Me.Tavern.OccupiedChairs = taverOccup;
@@ -384,6 +396,7 @@ namespace FoE.Farmer.Library
         Error = 0b0000_0100,
         Debug = 0b0000_1000,
         Request = 0b0001_0000,
+        Exception = 0b0010_0000,
         Verbose = 0b1111_1111,
         AllWithoutRequest = 0b1110_1111
     }
