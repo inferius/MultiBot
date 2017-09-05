@@ -29,7 +29,17 @@ namespace FoE.Farmer.Library.Payloads
             {
                 RequestClass = ClassName,
                 RequestMethod = "startProduction",
-                RequestData = new JArray(building.ID, building.Interval)
+                RequestData = new JArray(building.ID, building.Type == BuildType.Military ? (building as MilitaryBuilding).ReserveSlot() : building.Interval)
+            };
+        }
+
+        public static Payload UnlockSlot(UnitSlot slot)
+        {
+            return new Payload
+            {
+                RequestClass = ClassName,
+                RequestMethod = "unlockSlot",
+                RequestData = new JArray(slot.Parent.ID, slot.Order, 0)
             };
         }
 

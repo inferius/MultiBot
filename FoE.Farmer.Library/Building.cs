@@ -19,11 +19,11 @@ namespace FoE.Farmer.Library
         public DateTime MinNextPickup { get; set; } = DateTime.MaxValue;
 
         public BuildType Type { get; private set; }
-        public ProductionState ProductionState { get; private set; }
+        public ProductionState ProductionState { get; protected set; }
         public (int, int) Position { get; set; }
         public int ProductionTime { get; set; }
 
-        public bool CanPickup
+        public virtual bool CanPickup
         {
             get
             {
@@ -47,7 +47,7 @@ namespace FoE.Farmer.Library
             }
         }
 
-        public async Task<bool> Pickup()
+        public virtual async Task<bool> Pickup()
         {
             if (!CanPickup) return false;
 
@@ -89,7 +89,7 @@ namespace FoE.Farmer.Library
                 case "residential": b.Type = BuildType.Residential; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalResidental; break;
                 case "decoration": b.Type = BuildType.Decoration; break;
                 case "main_building": b.Type = BuildType.MainBuilding; b.Interval = (int)TimeIntervalSupplies.OneDay; break;
-                case "military": b.Type = BuildType.Military; break;
+                case "military": b = new MilitaryBuilding(); b.Type = BuildType.Military; break;
                 case "production": b.Type = BuildType.Supplies; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalSupplies; break;
                 case "goods": b.Type = BuildType.Goods; b.Interval = (int)ForgeOfEmpires.Manager.UserIntervalGoods; break;
                 default: return null;

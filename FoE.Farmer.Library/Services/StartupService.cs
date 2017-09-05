@@ -19,6 +19,7 @@ namespace FoE.Farmer.Library.Services
             ParseUserData(j["user_data"]);
             ParseSocialBar(j["socialbar_list"]);
             ParseCityMap(j["city_map"]);
+            ParseUnitSlots(j["unit_slots"]);
         }
 
         private static void ParseUserData(JToken j)
@@ -58,6 +59,21 @@ namespace FoE.Farmer.Library.Services
                 if (b == null) continue;
                 b.Owner = ForgeOfEmpires.Manager.Me;
                 ForgeOfEmpires.Manager.Me.Buildings.Add(b);
+            }
+        }
+
+        private static void ParseUnitSlots(JToken j)
+        {
+            //Manager.Log($"Loaded unit slots. Count: {(j["entities"] as JArray)?.Count ?? 0}");
+            var militaryBuilding = ForgeOfEmpires.Manager.Me.Buildings.Where(item => item.Type == BuildType.Military);
+            foreach (var s in j as JArray)
+            {
+                var slot = UnitSlot.Parse(s);
+                var build = militaryBuilding.FirstOrDefault(item => item.ID == s["entity_id"].ToObject<int>()) as MilitaryBuilding;
+                if (build == null) continue;
+                slot.Parent = build;
+                build.UnitSLots.Add(slot);
+                slot.UnlockSlot();
             }
         }
     }

@@ -146,6 +146,7 @@ namespace FoE.Farmer.Library
             }
 
             PickupByType(BuildType.MainBuilding);
+            PickupByType(BuildType.Military);
 
         }
 

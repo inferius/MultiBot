@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -105,6 +107,7 @@
     <Compile Include="ForgeOfEmpires.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Manager.cs" />
+    <Compile Include="MilitaryBuilding.cs" />
     <Compile Include="Payload.cs" />
     <Compile Include="PayloadManager.cs" />
     <Compile Include="Payloads\CityProductionService.cs" />
