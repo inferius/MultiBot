@@ -30,7 +30,7 @@ namespace FoE.Farmer.Library
         public const string BaseAddress = "{0}.forgeofempires.com";
         public const string AddressTemplate = "https://{0}/game/json?h={1}";
         public static readonly HttpClient Client = new HttpClient();
-        public const string Secret = "yOy3qr/HW9NZ9iLXjYLVADMO7wKMZcTgsUVqcqkl+h7ddVER8sHYEH6bxsSJOzerXci2kJKcMM9xQZjmdVD08Q==";
+        public const string Secret = "ZRXUMe3xbidOsYX2ehlnPPwc19ugsbW6vjA2IwtHNdpo8zMGxaqVTqTmKbnkGIEPiTFiu+wfPkossSWAu68MTQ==";
         public static string Timestamp = "1498641829";
 
         private const string GameVersion = "1.104";
