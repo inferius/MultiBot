@@ -2,7 +2,7 @@
 
 
 **Release download here**
-[MultiBot Release](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/)
+[MultiBot Release](https://1drv.ms/f/s!AuKOFjWmpJDUioo5NvQeaffnujxMcQ)
 
 Forge of Empires Manager
 Based on C# specifically on the WPF and [CefSharp](https://github.com/cefsharp/CefSharp)
@@ -41,7 +41,7 @@ Collection bot for game Forge of Empires.
 
 [Visual C++ Redistributable Packages for Visual Studio 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
-[Adobe Flash 2.6(Pepper)](http://dl.michalosoft.cz/subdomains/dl/MultiBot/Release/flashplayer26pp_fa_install.exe)
+[Adobe Flash 2.6(Pepper)](https://1drv.ms/u/s!AuKOFjWmpJDUio9kNvQeaffnujxMcQ)
 
 ## Legal
 Violation of any of the terms below will result in the termination of your Account. You agree to use the Service at your own risk.
