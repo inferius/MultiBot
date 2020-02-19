@@ -30,16 +30,16 @@ namespace FoE.Farmer.Library
         public const string BaseAddress = "{0}.forgeofempires.com";
         public const string AddressTemplate = "https://{0}/game/json?h={1}";
         public static readonly HttpClient Client = new HttpClient();
-        public const string Secret = "ZRXUMe3xbidOsYX2ehlnPPwc19ugsbW6vjA2IwtHNdpo8zMGxaqVTqTmKbnkGIEPiTFiu+wfPkossSWAu68MTQ==";
-        public static string Timestamp = "1498641829";
+        public const string Secret = "a9etc+h5UrJ+3Ec5NoMh3eFLygCrpdTBP2L3b3dMZtAbOiyYT7Tf9xX8cz1ddLR6FpuVurkvA9A/7Wsx1SHClA==";
+        public static string Timestamp = "1518000888";
 
-        private const string GameVersion = "1.104";
+        private const string GameVersion = "1.119";
 
         public static Dictionary<string, string> TemplateRequestHeader { get; set; } = new Dictionary<string, string>();
         //nms10266@uzrip.com
 
         private static string Server { get; set; } = "cz5";
-        public static string UserKey { get; set; } = "QImVFSEspfcKkw5KT4D5CVjq";
+        public static string UserKey { get; set; } = "----";
         // Cookies
         public static string SID { get; set; } = "9P5Tup3ajM04nLdxKgkVT0GO6j4VTHq5p95Yq5Ub";
         public static string _GA { get; set; } = "";

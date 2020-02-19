@@ -367,7 +367,7 @@ namespace FoE.Farmer.Library.Windows
             var FncSend = "function "+ AP._f("sendRequest") + "(data, signature){return new Promise((r, c) => {$.ajax({type: 'POST',url: '/game/json?h=" + Requests.UserKey + "', data: data, contentType: 'application/json', dataType: 'json', beforeSend: (xhr) => {" +
                           "xhr.setRequestHeader('Signature', signature);" +
                           $"xhr.setRequestHeader('Client-Identification', '{Requests.TemplateRequestHeader["Client-Identification"]}');" +
-                          $"xhr.setRequestHeader('X-Requested-With', '{Requests.TemplateRequestHeader["X-Requested-With"]}');" +
+                          //$"xhr.setRequestHeader('X-Requested-With', '{Requests.TemplateRequestHeader["X-Requested-With"]}');" +
                           "},success: function(result) {r(result);},error: function(result) { c(result);}});});}";
 
             Browser.ExecuteScriptAsync(FncSend);
