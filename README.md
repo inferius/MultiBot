@@ -9,8 +9,6 @@ Based on C# specifically on the WPF and [CefSharp](https://github.com/cefsharp/C
 
 Collection bot for game Forge of Empires.
 
-## Donate [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/inferius)
-[If you like our work, please donate!!](https://www.paypal.me/inferius) Your contribution will be greatly appreciated.
 
 ### Features
 * Collect gold from residental building
