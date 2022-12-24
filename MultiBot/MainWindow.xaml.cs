@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,7 +34,7 @@ namespace MultiBot
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             d.Close();
-            //Application.Current.Shutdown();
+            Application.Current.Shutdown();
         }
 
     }
