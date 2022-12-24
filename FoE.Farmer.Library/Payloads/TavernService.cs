@@ -25,6 +25,20 @@ namespace FoE.Farmer.Library.Payloads
                 RequestData = new JArray(player.ID)
             };
         }
+
+        /// <summary>
+        /// Informace o okolních tavernach
+        /// </summary>
+        /// <returns></returns>
+        public static Payload GetOtherTavernStates()
+        {
+            return new Payload
+            {
+                RequestClass = ClassName,
+                RequestMethod = "getOtherTavernStates",
+            };
+        }
+
         public static Payload GetConfig()
         {
             return new Payload

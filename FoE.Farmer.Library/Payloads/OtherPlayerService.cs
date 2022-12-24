@@ -50,7 +50,7 @@ namespace FoE.Farmer.Library.Payloads
             return new Payload
             {
                 RequestClass = ClassName,
-                RequestMethod = "getFriendsList"
+                RequestMethod = "getSocialList"
             };
         }
     }

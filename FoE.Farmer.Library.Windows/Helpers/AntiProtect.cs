@@ -40,7 +40,8 @@ namespace FoE.Farmer.Library.Windows.Helpers
     {
         public static string _f(string name)
         {
-            return AntiProtect.GetAntiProtectFunctionName(name);
+            return name;
+            //return AntiProtect.GetAntiProtectFunctionName(name);
         }
     }
 }

@@ -30,10 +30,10 @@ namespace FoE.Farmer.Library
         public const string BaseAddress = "{0}.forgeofempires.com";
         public const string AddressTemplate = "https://{0}/game/json?h={1}";
         public static readonly HttpClient Client = new HttpClient();
-        public const string Secret = "a9etc+h5UrJ+3Ec5NoMh3eFLygCrpdTBP2L3b3dMZtAbOiyYT7Tf9xX8cz1ddLR6FpuVurkvA9A/7Wsx1SHClA==";
+        public const string Secret = "N5ISfNGBbFwPwg8o4f5s1S7pkK32JJ0HnDdEgD7tJ5oD0IrmHJFj8DQAqPFqYt4hZtvZ+wQKmLGCFjZs8Q2qcQ==";
         public static string Timestamp = "1518000888";
 
-        private const string GameVersion = "1.119";
+        private const string GameVersion = "1.245";
 
         public static Dictionary<string, string> TemplateRequestHeader { get; set; } = new Dictionary<string, string>();
         //nms10266@uzrip.com
@@ -41,7 +41,7 @@ namespace FoE.Farmer.Library
         private static string Server { get; set; } = "cz5";
         public static string UserKey { get; set; } = "----";
         // Cookies
-        public static string SID { get; set; } = "9P5Tup3ajM04nLdxKgkVT0GO6j4VTHq5p95Yq5Ub";
+        public static string SID { get; set; } = "1c1n4gXmWZ8JtavhFHRlWspxldoq1krhtNuMQSaO";
         public static string _GA { get; set; } = "";
         public static string _GID { get; set; } = "";
         public static string StartupMicrotime { get; set; } = "";
@@ -116,25 +116,25 @@ namespace FoE.Farmer.Library
             wr.Accept = "*/*";
             wr.Host = Domain;
             wr.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-            wr.Referer = $"https://foecz.innogamescdn.com/swf/Preloader.swf?{Timestamp}/[[DYNAMIC]]/1";
+            //wr.Referer = $"https://foecz.innogamescdn.com/swf/Preloader.swf?{Timestamp}/[[DYNAMIC]]/1";
             wr.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36";
             wr.CookieContainer = new CookieContainer();
-            wr.CookieContainer.Add(GetCookie("metricsUvId", "98cf6fd3-5872-4080-bf40-934b90b70a71"));
+            wr.CookieContainer.Add(GetCookie("metricsUvId", "599c6524-c757-4bcb-bd6a-2491080deade"));
             wr.CookieContainer.Add(GetCookie("sid", SID));
             wr.CookieContainer.Add(GetCookie("req_page_info", "game_v1"));
             wr.CookieContainer.Add(GetCookie("start_page_type", "game"));
             wr.CookieContainer.Add(GetCookie("start_page_version", "v1"));
-            wr.CookieContainer.Add(GetCookie("_ga", "GA1.2.1298412460.1491422581"));
+            //wr.CookieContainer.Add(GetCookie("_ga", "GA1.2.1298412460.1491422581"));
             wr.CookieContainer.Add(GetCookie("ig_conv_last_site", $"https://{Domain}/game/index"));
 
 
             //wr.Headers["Connection"] = "keep-alive";
-            wr.Headers["Client-Identification"] = $"version={GameVersion}; requiredVersion={GameVersion}; platform=bro; platformVersion=web";
+            wr.Headers["Client-Identification"] = $"version={GameVersion}; requiredVersion={GameVersion}; platform=bro; platformType=html5; platformVersion=web";
             wr.Headers["Origin"] = "https://foecz.innogamescdn.com";
-            wr.Headers["X-Requested-With"] = "ShockwaveFlash/26.0.0.131";
+            //wr.Headers["X-Requested-With"] = "ShockwaveFlash/26.0.0.131";
             wr.Headers["Signature"] = BuildSignature(jsonString);
             //wr.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36";
-            //wr.Headers["Referer"] = $"https://foecz.innogamescdn.com/swf/Preloader.swf?{Timestamp}/[[DYNAMIC]]/1";
+            wr.Headers["Referer"] = $"https://cz1.forgeofempires.com/game/index?";//{Timestamp}/[[DYNAMIC]]/1";
             wr.Headers["Accept-Encoding"] = "gzip, deflate, br";
             wr.Headers["Accept-Language"] = "cs-CZ,cs;q=0.8";
             //wr.Headers["Cookie"] = $"metricsUvId=98cf6fd3-5872-4080-bf40-934b90b70a71; sid={SID}; req_page_info=game_v1; start_page_type=game; start_page_version=v1; _ga=GA1.2.1298412460.1491422581; ig_conv_last_site=https://{Domain}/game/index";

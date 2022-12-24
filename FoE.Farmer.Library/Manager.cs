@@ -324,7 +324,7 @@ namespace FoE.Farmer.Library
                         // Research saervice
                         break;
                     case "OtherPlayerService":
-                        if (j["requestMethod"].ToString() == "getFriendsList")
+                        if (j["requestMethod"].ToString() == "getSocialList")
                         {
                             var friends = j["responseData"] as JArray;
 
@@ -345,6 +345,14 @@ namespace FoE.Farmer.Library
 
                             }
                             Log("Freinds player load " + i, LogMessageType.Debug);
+                        }
+                        else if (j["requestMethod"].ToString() == "getAwaitingFriendRequestCount")
+                        {
+                            var friends = j["responseData"] as JArray;
+
+                            var friendRequestCount = (friends[0]).ToObject<int>();
+                            
+                            Log("Freinds player load " + friendRequestCount, LogMessageType.Debug);
                         }
                         // player and friend service
                         break;

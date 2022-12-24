@@ -8,7 +8,9 @@
       xmlns:local="clr-namespace:FoE.Farmer.Library.Windows"
       mc:Ignorable="d" 
       d:DesignHeight="768" d:DesignWidth="1024"
-      Title="MainPage">
+      Title="MainPage"
+      Unloaded="Page_Unloaded"
+      >
 
     <Grid>
         <TabControl Margin="1,0,-1,0">

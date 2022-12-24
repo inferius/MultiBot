@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CefSharp;
+using CefSharp.Callback;
 
 namespace FoE.Farmer.Library.Windows
 {
@@ -85,6 +86,24 @@ namespace FoE.Farmer.Library.Windows
 
         public void Cancel()
         {
+        }
+
+        public bool Open(IRequest request, out bool handleRequest, ICallback callback)
+        {
+            handleRequest = false;
+            return false;
+        }
+
+        public bool Skip(long bytesToSkip, out long bytesSkipped, IResourceSkipCallback callback)
+        {
+            bytesSkipped = 0;
+            return false;
+        }
+
+        public bool Read(Stream dataOut, out int bytesRead, IResourceReadCallback callback)
+        {
+            bytesRead = 0;
+            return false;
         }
     }
 }

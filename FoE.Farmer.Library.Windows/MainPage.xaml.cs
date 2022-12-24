@@ -46,6 +46,11 @@ namespace FoE.Farmer.Library.Windows
         private static bool IsReloginRunning = false;
         private static readonly string TempFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft", "FoEBot");
         private bool IsOtherBrowserInit = false;
+        private BrowserSettings _globalUIBrowserSetting = new BrowserSettings
+        {
+            DefaultEncoding = "UTF-8",
+            WindowlessFrameRate = 30
+        };
 
         public MainPage(Window w)
         {
@@ -65,6 +70,8 @@ namespace FoE.Farmer.Library.Windows
                     ForgeOfEmpires.Manager.ParseStringData(args.Data);
                 }
             };
+
+            otherBrowser.BrowserSettings = _globalUIBrowserSetting;
 
             LoadConfig();
 
@@ -159,18 +166,20 @@ namespace FoE.Farmer.Library.Windows
             settings.CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft\\FoFBot\\Cache");//@"C:\Temp\Cache";
             settings.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.3071.115 Safari/537.36";
 
-            if (settings.CefCommandLineArgs.ContainsKey("enable-system-flash"))
-            {
-                settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            }
-            else
-            {
-                settings.CefCommandLineArgs.Add("enable-system-flash", "1");
-            }
+            //if (settings.CefCommandLineArgs.ContainsKey("enable-system-flash"))
+            //{
+            //    settings.CefCommandLineArgs["enable-system-flash"] = "1";
+            //}
+            //else
+            //{
+            //    settings.CefCommandLineArgs.Add("enable-system-flash", "1");
+            //}
 
-            settings.CefCommandLineArgs.Add("enable-npapi", "1");
+            //settings.CefCommandLineArgs.Add("enable-npapi", "1");
             //settings.CefCommandLineArgs.Add("ppapi-flash-version", @"26.0.0.131");
             //settings.CefCommandLineArgs.Add("ppapi-flash-path", @"C:\Temp\pepflashplayer64_26_0_0_131.dll");
+            settings.CefCommandLineArgs.Add("allow-universal-access-from-files", String.Empty);
+            settings.CefCommandLineArgs.Add("allow-file-access-from-files", String.Empty);
             settings.IgnoreCertificateErrors = true;
             settings.RegisterScheme(new CefCustomScheme
             {
@@ -192,9 +201,6 @@ namespace FoE.Farmer.Library.Windows
             //otherBrowser.Address = new Uri("http://api.michalosoft.cz/ResourceService.html").AbsoluteUri;
             otherBrowser.Address = new Uri(Path.Combine(TempFolder, "OtherResources.html")).AbsoluteUri;
 
-            otherBrowser.BrowserSettings.DefaultEncoding = "UTF-8";
-            otherBrowser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
-            otherBrowser.BrowserSettings.WindowlessFrameRate = 30;
             //otherBrowser.Margin = new Thickness(10, 113, 10.4, 10.4);
             otherBrowser.Width = double.NaN;
             otherBrowser.Height = double.NaN;
@@ -206,38 +212,22 @@ namespace FoE.Farmer.Library.Windows
         private void InitBrowser()
         {
 #if UI_BROWSER
-            Browser = new ChromiumWebBrowser();
+            Browser = new ChromiumWebBrowser(automaticallyCreateBrowser: false);
             Browser.WebBrowser = Browser;
             Browser.Address = new Uri($"https://{Requests.Domain}/").AbsoluteUri;
 #else
-            Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
+            var browserSetting = new BrowserSettings();
+            browserSetting.DefaultEncoding = "UTF-8";
+            browserSetting.WindowlessFrameRate = 30;
+
+            Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri, browserSetting, automaticallyCreateBrowser: false);
 #endif
-            ////otherBrowser = new CefSharp.Wpf.ChromiumWebBrowser();
-            //otherBrowser.WebBrowser = otherBrowser;
-            ////otherBrowser.Address = new Uri("http://api.michalosoft.cz/ResourceService.html").AbsoluteUri;
-            //otherBrowser.Address = new Uri(Path.Combine(TempFolder, "OtherResources.html")).AbsoluteUri;
 
-            //otherBrowser.BrowserSettings.DefaultEncoding = "UTF-8";
-            //otherBrowser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
-            //otherBrowser.BrowserSettings.WindowlessFrameRate = 30;
-            //otherBrowser.Margin = new Thickness(10, 113, 10.4, 10.4);
-            //otherBrowser.Width = double.NaN;
-            //otherBrowser.Height = double.NaN;
+            Browser.JavascriptObjectRepository.Settings.LegacyBindingEnabled = true;
+            Browser.JavascriptObjectRepository.Register(AP._f("responseManager"), new RequestObject(), isAsync: true, options: BindingOptions.DefaultBinder);
+            Browser.RequestHandler = new FoFRequestHandler();
 
-            //ResourceInfoGrid.Children.Add(otherBrowser);
 
-            Browser.RegisterAsyncJsObject(AP._f("responseManager"), new RequestObject());
-            Browser.BrowserSettings.DefaultEncoding = "UTF-8";
-            Browser.BrowserSettings.FileAccessFromFileUrls = CefState.Enabled;
-            Browser.BrowserSettings.WindowlessFrameRate = 30;
-
-            Browser.RequestHandler = new RequestHandler();
-            //Browser.IsBrowserInitializedChanged += (sender, args) =>
-            //{
-            //    if (Browser.IsBrowserInitialized)
-            //    {
-            //    }
-            //};
             Browser.FrameLoadEnd += (sender, args) =>
             {
                 Dispatcher.Invoke(() =>
@@ -250,6 +240,9 @@ namespace FoE.Farmer.Library.Windows
 
 
             };
+
+            Browser.CreateBrowser();
+
             //LoadScripts();
 
 #if UI_BROWSER
@@ -639,6 +632,17 @@ namespace FoE.Farmer.Library.Windows
             {
                 otherBrowser.ShowDevTools();
             }
+        }
+
+        public void Close()
+        {
+            otherBrowser?.Dispose();
+            Browser?.Dispose();
+        }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
