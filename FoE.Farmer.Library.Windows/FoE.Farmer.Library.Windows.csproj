@@ -18,6 +18,8 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,6 +86,9 @@
     <Reference Include="CefSharp.OffScreen, Version=108.4.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
       <HintPath>..\packages\CefSharp.OffScreen.108.4.130\lib\net462\CefSharp.OffScreen.dll</HintPath>
     </Reference>
+    <Reference Include="CefSharp.WinForms, Version=108.4.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.WinForms.108.4.130\lib\net462\CefSharp.WinForms.dll</HintPath>
+    </Reference>
     <Reference Include="CefSharp.Wpf, Version=108.4.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
       <HintPath>..\packages\CefSharp.Wpf.108.4.130\lib\net462\CefSharp.Wpf.dll</HintPath>
     </Reference>
@@ -92,9 +97,6 @@
     </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.9\lib\net47\MahApps.Metro.dll</HintPath>
-    </Reference>
-    <Reference Include="MiCHALosoft.Config">
-      <HintPath>..\ExternalDLL\MiCHALosoft.Config.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
@@ -118,6 +120,7 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -130,8 +133,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="CookiesManager.cs" />
     <Compile Include="DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>
@@ -139,9 +144,11 @@
     <Compile Include="Events\DataRecived.cs" />
     <Compile Include="FoFRequestHandler.cs" />
     <Compile Include="Helpers\AntiProtect.cs" />
+    <Compile Include="Helpers\BooleanToTagConverter.cs" />
     <Compile Include="Helpers\Image.cs" />
     <Compile Include="Helpers\StringCrypto.cs" />
     <Compile Include="FoFResourceRequestHandler.cs" />
+    <Compile Include="Helpers\TimerEnum.cs" />
     <Compile Include="RequestObject.cs" />
     <Compile Include="ResourceHandler.cs" />
     <Page Include="DebugWindow.xaml">

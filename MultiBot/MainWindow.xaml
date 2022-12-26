@@ -7,6 +7,7 @@
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
                       GlowBrush="{DynamicResource AccentColorBrush}"
+                      Closed="MainWindow_Closed"
         Title="MultiBot" Height="768" Width="1024">
     <Grid>
         <Frame Name="MainFrame" />

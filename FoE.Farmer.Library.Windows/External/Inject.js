@@ -20,9 +20,10 @@ async function FoELogin() {
     //alert(FoELoginUserName + "_" + FoELoginPassword);
     await FoFTimer(500);
     document.getElementById("login_Login").click();
+    console.debug("Login button clicked...Waiting for errors.");
     await FoFTimer(5000);
     var errorData = document.querySelector("#login > div > form > div.validation-error > span > span:nth-child(2)");
-    responseManager.setError(errorData.textContent);
+    responseManager.setError(errorData?.textContent);
 }
 
 function FoEPlay() {
@@ -35,17 +36,24 @@ function FoEPlay() {
     }
 
     document.querySelector("#play_now_button").click();
+    console.debug("Play button clicked");
     setTimeout(() => {
-            var el = void 0;
-            if (FoEWordName)
+        console.debug("Searching " + FoEWordName);
+        var el = void 0;
+            if (FoEWordName) {
                 el = Array.from(document.querySelectorAll("#world_selection_content .world_select_button")).find(item => item.textContent == FoEWordName);
+                console.debug(`World: '${FoEWordName}' was found`);
+            }
             else {
+                console.debug(`World: '${FoEWordName}' not found`);
                 var d = Array.from(document.querySelectorAll("#world_selection_content .world_select_button"));
                 if (d.length > 0) el = d[0];
+                console.debug(`World: '${el?.textContent ?? "No world"}' use instead`);
             }
 
-            if (el) el.click();
-        },
+           el?.click();
+           console.debug("WorldButton Clicked");
+    },
         1000);
 }
 

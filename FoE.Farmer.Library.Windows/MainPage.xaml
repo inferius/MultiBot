@@ -5,13 +5,19 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
       xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
-      xmlns:local="clr-namespace:FoE.Farmer.Library.Windows"
+      xmlns:src="clr-namespace:FoE.Farmer.Library.Windows"
+      xmlns:helpers="clr-namespace:FoE.Farmer.Library.Windows.Helpers"
       mc:Ignorable="d" 
       d:DesignHeight="768" d:DesignWidth="1024"
       Title="MainPage"
       Unloaded="Page_Unloaded"
       >
-
+    <Page.DataContext>
+        <src:Config x:Name="ConfigProvider"/>
+    </Page.DataContext>
+    <Page.Resources>
+        <helpers:BooleanToTagConverter x:Key="BooleanToTagConverter"></helpers:BooleanToTagConverter>
+    </Page.Resources>
     <Grid>
         <TabControl Margin="1,0,-1,0">
             <TabItem Header="Log">
@@ -37,7 +43,7 @@
             </TabItem>
             <TabItem Header="Research">
                 <Grid>
-                    
+
                 </Grid>
             </TabItem>
             <TabItem Header="Trade manager">
@@ -54,31 +60,31 @@
             <TabItem Header="Config">
                 <Grid x:Name="ConfigGrid">
                     <Label Content="Goods Timer" Width="100" Margin="0,0,344,229.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="10,26,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" IsChecked="True" Content="8 hours" Tag="EightHours" Width="100" Margin="10,50,334,181.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="1 day" Tag="OneDay" Width="100" Margin="10,74,334,157.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="GoodsTimer" Content="2 days" Tag="TwoDays" Width="100" Margin="10,98,334,133.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton GroupName="GoodsTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="10,26,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton GroupName="GoodsTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="10,50,334,181.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton GroupName="GoodsTimer" Content="1 day" Tag="OneDay" Width="100" Margin="10,74,334,157.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <RadioButton GroupName="GoodsTimer" Content="2 days" Tag="TwoDays" Width="100" Margin="10,98,334,133.2" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
                     <Label Content="Supplies Timer" Width="100" Margin="100,0,244,229.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="110,31,234,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinutes" Width="100" Margin="110,55,234,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="110,79,234,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="110,104,234,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="110,128,234,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="SuppliesTimer" Content="1 day" Tag="OneDay" Width="100" Margin="110,152,234,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="110,31,234,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="15 minutes" Tag="FifteenMinutes" Width="100" Margin="110,55,234,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="110,79,234,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="110,104,234,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="110,128,234,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="SuppliesTimer" Content="1 day" Tag="OneDay" Width="100" Margin="110,152,234,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
 
                     <Label Content="Residental Timer" Width="100" Margin="205,0,139,229.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="215,31,129,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" IsChecked="True" Content="15 minutes" Tag="FiftenMinutes" Width="100" Margin="215,55,129,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="215,79,129,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="215,104,129,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="215,128,129,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                    <RadioButton Checked="ToggleButton_OnChecked" GroupName="ResidentalTimer" Content="1 day" Tag="OneDay" Width="100" Margin="215,152,129,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="5 minutes" Tag="FiveMinutes" Width="100" Margin="215,31,129,200.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="15 minutes" Tag="FifteenMinutes" Width="100" Margin="215,55,129,176.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="1 hour" Tag="OneHour" Width="100" Margin="215,79,129,152.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="4 hours" Tag="FourHours" Width="100" Margin="215,104,129,127.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="8 hours" Tag="EightHours" Width="100" Margin="215,128,129,103.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    <RadioButton GroupName="ResidentalTimer" Content="1 day" Tag="OneDay" Width="100" Margin="215,152,129,79.2" VerticalAlignment="Top" HorizontalAlignment="Left" />
 
-                    <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="User name"  x:Name="UserName" TextWrapping="Wrap" Text="" Margin="408,23,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
+                    <TextBox Text="" controls:TextBoxHelper.Watermark="User name"  x:Name="UserName" TextWrapping="Wrap" Margin="408,23,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
                     <PasswordBox PasswordChanged="Password_OnPasswordChanged"  controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Password"  x:Name="Password"  Margin="408,62,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
-                    <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="World name"  x:Name="WorldName" TextWrapping="Wrap" Text="" Margin="408,103,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
-                    <TextBox TextChanged="UserInfoChange_OnTextChanged" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Domain (default: cz.forgeofempires.com)"  x:Name="Domain" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True" Margin="408,140,0,0"/>
+                    <TextBox controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="World name"  x:Name="WorldName" TextWrapping="Wrap" Text="" Margin="408,103,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True"/>
+                    <TextBox controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Domain (default: cz.forgeofempires.com)"  x:Name="Domain" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="303" controls:TextBoxHelper.UseFloatingWatermark="True" Margin="408,140,0,0"/>
 
                     <CheckBox Visibility="Collapsed" Content="Auto login after start" IsChecked="True" x:Name="AutoLoginCheck" Width="100" Margin="408,116,0,0" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top"/>
                     <!--<Label Content="User Name" Width="70" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="338,23,0,0" />-->
@@ -92,7 +98,7 @@
                         </TextBlock.Text>
                     </TextBlock>
                     <TextBox controls:TextBoxHelper.Watermark="3 days" HorizontalAlignment="Left" Height="23" Margin="10,247,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="130"/>
-                    <TextBox x:Name="TavernMinOccupation" TextChanged="TavernMinOccupation_OnTextChanged" HorizontalAlignment="Left" Height="36" Margin="10,290,0,0" TextWrapping="Wrap" Text="75" VerticalAlignment="Top" Width="159" controls:TextBoxHelper.UseFloatingWatermark="True" controls:TextBoxHelper.AutoWatermark="True" controls:TextBoxHelper.Watermark="Tavern min occupation in %"/>
+                    <TextBox x:Name="TavernMinOccupation" HorizontalAlignment="Left" Height="36" Margin="10,290,0,0" TextWrapping="Wrap" Text="75" VerticalAlignment="Top" Width="159" controls:TextBoxHelper.UseFloatingWatermark="True" controls:TextBoxHelper.AutoWatermark="True" controls:TextBoxHelper.Watermark="Tavern min occupation in %"/>
 
 
                 </Grid>
@@ -107,6 +113,16 @@
         </TabControl>
         <Button Click="ButtonBase_OnClick" Content="DevTools" Margin="0,2,5.6,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"/>
         <Button Click="ButtonBase1_OnClick"  Content="Relogin" Margin="0,2,85.6,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"/>
+        <ProgressBar 
+            HorizontalAlignment="Left" 
+            Height="10" 
+            Margin="863,28,0,0" 
+            VerticalAlignment="Top" 
+            Width="155"
+            IsIndeterminate="{Binding IsLoading, ElementName=otherBrowser}"
+            Visibility="{Binding IsLoading, ElementName=otherBrowser, Converter={StaticResource BooleanToVisibilityConverter}}"
+            />
+
         <Grid x:Name="ForegroundGrid" Width="1" Height="1">
             <cefSharp:ChromiumWebBrowser x:Name="otherBrowser" Width="1" Height="1"></cefSharp:ChromiumWebBrowser>
         </Grid>

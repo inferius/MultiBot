@@ -152,10 +152,10 @@ namespace FoE.Farmer.Library
 
     public enum TimeIntervalGoods
     {
-        FourHours = 1,
-        EightHours = 2,
-        OneDay = 3,
-        TwoDays = 4
+        FourHours = 4,
+        EightHours = 5,
+        OneDay = 6,
+        TwoDays = 7
     }
 
     public enum TimeIntervalSupplies

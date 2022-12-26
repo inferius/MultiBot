@@ -1,4 +1,6 @@
 ﻿//#define UI_BROWSER
+//#define UI_WEBFORM
+//#define DISABLE_GPU
 
 using System;
 using System.Collections.Generic;
@@ -18,13 +20,21 @@ using System.Windows.Threading;
 using CefSharp;
 using FoE.Farmer.Library.Windows.Events;
 #if UI_BROWSER
+#if UI_WEBFORM
+using CefSharp.WinForms;
+#else
 using CefSharp.Wpf;
+#endif
 #else
 using CefSharp.OffScreen;
 #endif
 using FoE.Farmer.Library.Windows.Helpers;
-using MiCHALosoft;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Runtime.InteropServices.ComTypes;
+using System.Windows.Data;
+using MahApps.Metro.Controls;
+using CefSharp.DevTools.Network;
 
 namespace FoE.Farmer.Library.Windows
 {
@@ -33,7 +43,7 @@ namespace FoE.Farmer.Library.Windows
     /// </summary>
     public partial class MainPage : Page
     {
-        public static Config Config = new Config("FoE.Config.xml");
+        //public Config Config = null;
         private static ChromiumWebBrowser Browser;
         //private static CefSharp.Wpf.ChromiumWebBrowser otherBrowser;
         private static bool CookieLoaded = false;
@@ -45,6 +55,7 @@ namespace FoE.Farmer.Library.Windows
         private static LogMessageType ShowLogMessageType = LogMessageType.AllWithoutRequest;
         private static bool IsReloginRunning = false;
         private static readonly string TempFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft", "FoEBot");
+        private static readonly string ConfigPath = Path.Combine(TempFolder, "FoE.Config.json");
         private bool IsOtherBrowserInit = false;
         private BrowserSettings _globalUIBrowserSetting = new BrowserSettings
         {
@@ -54,7 +65,6 @@ namespace FoE.Farmer.Library.Windows
 
         public MainPage(Window w)
         {
-            InitSettingBrowser();
             InitializeComponent();
             Directory.CreateDirectory(TempFolder);
 
@@ -78,16 +88,6 @@ namespace FoE.Farmer.Library.Windows
             LoadOtherResourcesHtml();
 
             InitBrowser();
-
-            w.Closed += (sender, args) =>
-            {
-                Manager.SaveCache();
-                SaveConfig();
-                Config.Save();
-                Cef.Shutdown();
-                Environment.Exit(0);
-                if (File.Exists(Path.Combine(TempFolder, "OtherResources.html"))) File.Delete(Path.Combine(TempFolder, "OtherResources.html"));
-            };
 
             var random = new Random();
             Requests.PayloadSendRequest += async (requests, args) =>
@@ -154,44 +154,6 @@ namespace FoE.Farmer.Library.Windows
 
         }
 
-        private void InitSettingBrowser()
-        {
-#if UI_BROWSER
-            Cef.EnableHighDPISupport();
-#endif
-
-            var settings = new CefSettings();
-            settings.RemoteDebuggingPort = 8088;
-            settings.WindowlessRenderingEnabled = true;
-            settings.CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiCHALosoft\\FoFBot\\Cache");//@"C:\Temp\Cache";
-            settings.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.3071.115 Safari/537.36";
-
-            //if (settings.CefCommandLineArgs.ContainsKey("enable-system-flash"))
-            //{
-            //    settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            //}
-            //else
-            //{
-            //    settings.CefCommandLineArgs.Add("enable-system-flash", "1");
-            //}
-
-            //settings.CefCommandLineArgs.Add("enable-npapi", "1");
-            //settings.CefCommandLineArgs.Add("ppapi-flash-version", @"26.0.0.131");
-            //settings.CefCommandLineArgs.Add("ppapi-flash-path", @"C:\Temp\pepflashplayer64_26_0_0_131.dll");
-            settings.CefCommandLineArgs.Add("allow-universal-access-from-files", String.Empty);
-            settings.CefCommandLineArgs.Add("allow-file-access-from-files", String.Empty);
-            settings.IgnoreCertificateErrors = true;
-            settings.RegisterScheme(new CefCustomScheme
-            {
-                SchemeName = FoFSchemeHandlerFactory.SchemeName,
-                SchemeHandlerFactory = new FoFSchemeHandlerFactory()
-            });
-
-            if (!Cef.IsInitialized)
-                if (!Cef.Initialize(settings))
-                    throw new Exception();
-        }
-
         private void InitOtherBrowser()
         {
             if (IsOtherBrowserInit) return;
@@ -212,13 +174,19 @@ namespace FoE.Farmer.Library.Windows
         private void InitBrowser()
         {
 #if UI_BROWSER
-            Browser = new ChromiumWebBrowser(automaticallyCreateBrowser: false);
+#if UI_WEBFORM
+            Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri);
+#else
+            Browser = new ChromiumWebBrowser();
             Browser.WebBrowser = Browser;
             Browser.Address = new Uri($"https://{Requests.Domain}/").AbsoluteUri;
+#endif
 #else
-            var browserSetting = new BrowserSettings();
-            browserSetting.DefaultEncoding = "UTF-8";
-            browserSetting.WindowlessFrameRate = 30;
+            var browserSetting = new BrowserSettings
+            {
+                DefaultEncoding = "UTF-8",
+                //WindowlessFrameRate = 30
+            };
 
             Browser = new ChromiumWebBrowser(new Uri($"https://{Requests.Domain}/").AbsoluteUri, browserSetting, automaticallyCreateBrowser: false);
 #endif
@@ -227,26 +195,51 @@ namespace FoE.Farmer.Library.Windows
             Browser.JavascriptObjectRepository.Register(AP._f("responseManager"), new RequestObject(), isAsync: true, options: BindingOptions.DefaultBinder);
             Browser.RequestHandler = new FoFRequestHandler();
 
+            Browser.ConsoleMessage += (sender, args) =>
+            {
+                Manager.Log(args.Message);
+            };
+
 
             Browser.FrameLoadEnd += (sender, args) =>
             {
-                Dispatcher.Invoke(() =>
-                {
-                    FrameLoaded = true;
+                if (args.Frame.IsMain) {
+                    Dispatcher.Invoke(() => {
+                        FrameLoaded = true;
 
-                    if (UserName.Text.Length == 0 || Password.Password.Length == 0) return;
-                    LoadScripts();
-                });
+                        /*args.Frame.EvaluateScriptAsync(@"Array.from(document.querySelectorAll(""script[src]"")).map(item => item.getAttribute(""src"")).find(item => item?.includes(""innogamescdn.com/cache/ForgeHX""))").ContinueWith(x => {
+                            var response = x.Result;
+                            if (response.Success && response.Result != null) {
+                                using (var f = new StreamReader(response.Result.ToString())) {
+                                    var t = f.ReadToEnd();
+                                    Application.Current.Dispatcher.Invoke(() => {
+                                        Manager.Log("SID FOUND");
+                                    });
 
+                                }
+                            }
+                        });*/
+
+                        if (UserName.Text.Length == 0 || Password.Password.Length == 0) return;
+                        LoadScripts();
+                    });
+                }
 
             };
-
+#if !UI_BROWSER
             Browser.CreateBrowser();
+#endif
 
             //LoadScripts();
 
 #if UI_BROWSER
+#if UI_WEBFORM
+            System.Windows.Forms.Integration.WindowsFormsHost host = new System.Windows.Forms.Integration.WindowsFormsHost();
+            host.Child= Browser;
+            BrowserGrid.Children.Add(host);
+#else
             BrowserGrid.Children.Add(Browser);
+#endif
 #else
             BrowserTabItem.Visibility = Visibility.Collapsed;
 #endif
@@ -254,7 +247,8 @@ namespace FoE.Farmer.Library.Windows
 
         private static void LoadScripts()
         {
-            IsScriptLoaded = true;
+
+            var result = new StringBuilder();
 
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "FoE.Farmer.Library.Windows.External.Inject.js";
@@ -262,9 +256,8 @@ namespace FoE.Farmer.Library.Windows
             using (var stream = assembly.GetManifestResourceStream(resourceName))
             using (var reader = new StreamReader(stream))
             {
-                var result = new StringBuilder(reader.ReadToEnd());
                 var wn = Requests.WorldName == null ? "null" : $"'{Requests.WorldName}'";
-
+                result.Append(reader.ReadToEnd());
                 result.Insert(0, $"var FoELoginUserName = '{Requests.UserName}'; var FoELoginPassword = '{Requests.Password}'; var FoEWordName = {wn};");
                 result.Replace("FoELoginUserName", AP._f("FoELoginUserName"));
                 result.Replace("FoELoginPassword", AP._f("FoELoginPassword"));
@@ -274,10 +267,10 @@ namespace FoE.Farmer.Library.Windows
                 result.Replace("FoFTimer", AP._f("FoFTimer"));
                 result.Replace("FoEPlay", AP._f("FoEPlay"));
 
-                Browser.ExecuteScriptAsync(result.ToString());
             }
 
-            //Browser.ExecuteScriptAsync()
+            Browser.ExecuteScriptAsync(result.ToString());
+            IsScriptLoaded = true;
 
         }
 
@@ -309,7 +302,7 @@ namespace FoE.Farmer.Library.Windows
             });
         }
 
-        public static void ShowCookies()
+        public static async void ShowCookies()
         {
             if (CookieLoaded) return;
             CookieLoaded = true;
@@ -343,11 +336,9 @@ namespace FoE.Farmer.Library.Windows
 
             if (AutoStart && !IsReloginRunning)
             {
-                Task.Delay(2000).ContinueWith((t) =>
-                {
-                    SendRequest(Payloads.StartupService.GetData());
-                    Manager.Log("Success login. (StartupService)");
-                }, TaskContinuationOptions.ExecuteSynchronously);
+                await Task.Delay(2000);
+                await SendRequest(Payloads.StartupService.GetData());
+                Manager.Log("Success login. (StartupService)");
             }
             else Manager.Log("Success login");
 
@@ -367,37 +358,23 @@ namespace FoE.Farmer.Library.Windows
             ForgeOfEmpires.Manager.IsInitialized = true;
         }
 
-        public static async void SendRequest(Payload payload)
+        public static async Task<JavascriptResponse> SendRequest(Payload payload)
         {
             Manager.Log("Request sent: " + payload.ToString(), LogMessageType.Request);
             var data = "[" + payload + "]";
             var signature = Requests.BuildSignature(data);
-            var script = $"(async () => {AP._f("responseManager")}.setData(JSON.stringify(await {AP._f("sendRequest")}('{data}', '{signature}')), '{signature}') )();";
+            var script = $"return (async () => {AP._f("responseManager")}.setData(JSON.stringify(await {AP._f("sendRequest")}('{data}', '{signature}')), '{signature}') )();";
 
             payloads.Add(signature, payload);
-            await Browser.EvaluateScriptAsync(script);
-
-        }
-
-        private void UserInfoChange_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (UserName.Text.Trim().Length > 0)
-            {
-                Requests.UserName = UserName.Text.Trim();
-                Config.SetValue("UserName", Requests.UserName);
+            var resp = await Browser.EvaluateScriptAsPromiseAsync(script);
+            try {
+                if (resp.Success) payload.TaskSource.SetResult(JArray.Parse(resp.Result.ToString()));
+            }
+            catch { 
+                // ignore
             }
 
-            if (WorldName.Text != null)
-            {
-                Requests.WorldName = WorldName.Text.Trim();
-                Config.SetValue("WorldName", Requests.WorldName);
-            }
-
-            if (Domain.Text.Trim().Length > 0)
-            {
-                Requests.Domain = Domain.Text.Trim();
-                Config.SetValue("Domain", Requests.Domain);
-            }
+            return resp;
         }
 
         private void StartStopBtn_Click(object sender, RoutedEventArgs e)
@@ -448,9 +425,8 @@ namespace FoE.Farmer.Library.Windows
         {
             if (Password.Password.Length > 0)
             {
-                Requests.Password = Password.Password;
-                var pwd = StringCipher.Encrypt(Password.Password, "FoEMultiBot");
-                Config.SetValue("Password", pwd);
+                //Requests.Password = Password.Password;
+                ConfigProvider.Password = Password.Password;
             }
 
             if (!IsScriptLoaded && Password.Password.Length > 0 && UserName.Text.Trim().Length > 0 && FrameLoaded)
@@ -463,144 +439,74 @@ namespace FoE.Farmer.Library.Windows
         {
             if (!ConfigLoaded) return;
 
-            var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
-            var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
-            var residentalTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
+            ForgeOfEmpires.Manager.UserIntervalGoods = (TimeIntervalGoods)ConfigProvider.GoodsTimer;
+            ForgeOfEmpires.Manager.UserIntervalSupplies = (TimeIntervalSupplies)ConfigProvider.SuppliesTimer;
+            ForgeOfEmpires.Manager.UserIntervalResidental = (TimeIntervalSupplies)ConfigProvider.ResidentalTimer;
+        }
 
-            if (!Enum.TryParse(goodsTimer, false, out TimeIntervalGoods goodsEnum))
-            {
-                goodsEnum = TimeIntervalGoods.EightHours;
-            }
+        private Binding SetBindingHelper(string propertyName)
+        {
+            Binding myBinding = new Binding(propertyName);
+            myBinding.Source = ConfigProvider;
+            myBinding.Mode = BindingMode.TwoWay;
 
-            if (!Enum.TryParse(suppliesTimer, false, out TimeIntervalSupplies suppliesEnum))
-            {
-                suppliesEnum = TimeIntervalSupplies.EightHours;
-            }
-
-            if (!Enum.TryParse(residentalTimer, false, out TimeIntervalSupplies residentalEnum))
-            {
-                residentalEnum = TimeIntervalSupplies.EightHours;
-            }
-
-            ForgeOfEmpires.Manager.UserIntervalGoods = goodsEnum;
-            ForgeOfEmpires.Manager.UserIntervalSupplies = suppliesEnum;
-            ForgeOfEmpires.Manager.UserIntervalResidental = residentalEnum;
+            return myBinding;
         }
 
         public void LoadConfig()
         {
-            var pwd = Config.GetValue("Password");
-            if (!string.IsNullOrEmpty(pwd))
+            if (!ConfigLoaded)
             {
-                pwd = StringCipher.Decrypt(pwd, "FoEMultiBot");
-                Requests.Password = pwd;
-                Password.Password = pwd;
-            }
-            pwd = Config.GetValue("UserName");
-            if (!string.IsNullOrEmpty(pwd))
-            {
-                Requests.UserName = pwd;
-                UserName.Text = pwd;
+                ConfigProvider.Load(ConfigPath);
+                ConfigProvider.PropertyChanged += (sender, arg) => {
+                    switch(arg.PropertyName) {
+                        case "Password": Requests.Password = ConfigProvider.Password; break;
+                        case "WorldName": Requests.WorldName = ConfigProvider.WorldName; break;
+                        case "UserName": Requests.UserName = ConfigProvider.UserName; break;
+                        case "Domain": Requests.Domain = ConfigProvider.Domain; break;
+                        case "GoodsTimer": ForgeOfEmpires.Manager.UserIntervalGoods = (TimeIntervalGoods)ConfigProvider.GoodsTimer; break;
+                        case "SuppliesTimer": ForgeOfEmpires.Manager.UserIntervalSupplies = (TimeIntervalSupplies)ConfigProvider.SuppliesTimer; break;
+                        case "ResidentalTimer": ForgeOfEmpires.Manager.UserIntervalResidental = (TimeIntervalSupplies)ConfigProvider.ResidentalTimer; break;
+                        case "TavernMinOccupation": {
+                                TavernMinOccupation.Text = ConfigProvider.TavernMinOccupation.ToString(CultureInfo.InvariantCulture);
+                                Services.TavernService.MinTaverOccupation = ConfigProvider.TavernMinOccupation / 100;
+
+                                break; 
+                            }
+                    }
+                };
             }
 
-            pwd = Config.GetValue("WorldName");
-            if (!string.IsNullOrEmpty(pwd))
-            {
-                Requests.WorldName = pwd;
-                WorldName.Text = pwd;
+            Password.Password = ConfigProvider.Password;
+            Requests.Password = ConfigProvider.Password;
+            Requests.WorldName = ConfigProvider.WorldName;
+            Requests.UserName = ConfigProvider.UserName;
+            Requests.Domain = ConfigProvider.Domain;
+
+            UserName.SetBinding(TextBox.TextProperty, SetBindingHelper("UserName"));
+            WorldName.SetBinding(TextBox.TextProperty, SetBindingHelper("WorldName"));
+            Domain.SetBinding(TextBox.TextProperty, SetBindingHelper("Domain"));
+            AutoLoginCheck.SetBinding(CheckBox.IsCheckedProperty, SetBindingHelper("AutoLoginCheck"));
+
+            // Bindovani Radiogroup
+            foreach (var item in ConfigGrid.FindChildren<RadioButton>()) {
+                var b = new Binding(item.GroupName)
+                {
+                    Converter = new BooleanToTagConverter(),
+                    ConverterParameter = Enum.Parse(typeof(TimerEnum), item.Tag.ToString()),
+                    Mode = BindingMode.TwoWay
+                };
+                item.SetBinding(RadioButton.IsCheckedProperty, b);
             }
 
-            pwd = Config.GetValue("Domain");
-            if (!string.IsNullOrEmpty(pwd))
-            {
-                Requests.Domain = pwd;
-                Domain.Text = pwd;
-            }
-            
-
-            var val = Config.GetValue("GoodsTimer");
-            if (!string.IsNullOrEmpty(val))
-            {
-                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.Tag.ToString() == val);
-                if (goodsTimer != null) goodsTimer.IsChecked = true;
-            }
-
-            val = Config.GetValue("SuppliesTimer");
-            if (!string.IsNullOrEmpty(val))
-            {
-                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer")
-                    .FirstOrDefault(r => r.Tag.ToString() == val);
-                if (goodsTimer != null) goodsTimer.IsChecked = true;
-            }
-
-            val = Config.GetValue("ResidentalTimer");
-            if (!string.IsNullOrEmpty(val))
-            {
-                var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer")
-                    .FirstOrDefault(r => r.Tag.ToString() == val);
-                if (goodsTimer != null) goodsTimer.IsChecked = true;
-            }
-
-            val = Config.GetValue("TavernMinOccupation");
-            if (!string.IsNullOrEmpty(val))
-            {
-                TavernMinOccupation.Text = val;
-                var num = val == "100" ? 1M : decimal.Parse("0." + val, CultureInfo.InvariantCulture);
-                Services.TavernService.MinTaverOccupation = num;
-            }
-
-            AutoLoginCheck.IsChecked = Config.GetValueAsBool("AutoLoginAfterStart");
             ConfigLoaded = true;
-            UpdateUserInterval();
         }
 
         public void SaveConfig()
         {
-            if (UserName.Text.Trim().Length > 0)
-            {
-                Requests.UserName = UserName.Text.Trim();
-                Config.SetValue("UserName", Requests.UserName);
-            }
-            if (WorldName.Text != null)
-            {
-                Requests.WorldName = WorldName.Text.Trim();
-                Config.SetValue("WorldName", Requests.WorldName);
-            }
-            if (Password.Password.Length > 0)
-            {
-                var pwd = StringCipher.Encrypt(Password.Password, "FoEMultiBot");
-                Requests.Password = Password.Password;
-                Config.SetValue("Password", pwd);
-            }
-
-            Requests.Domain = !string.IsNullOrWhiteSpace(Domain.Text) ? Domain.Text.Trim() : "";
-            Config.SetValue("Domain", Requests.Domain);
-
-            var goodsTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "GoodsTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
-            var suppliesTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "SuppliesTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
-            var residentalTimer = ConfigGrid.Children.OfType<RadioButton>().Where(item => item.GroupName == "ResidentalTimer").FirstOrDefault(r => r.IsChecked.Value)?.Tag.ToString();
-
-            if (goodsTimer != null)
-            {
-                Config.SetValue("GoodsTimer", goodsTimer);
-            }
-            if (suppliesTimer != null)
-            {
-                Config.SetValue("SuppliesTimer", suppliesTimer);
-            }
-            if (residentalTimer != null)
-            {
-                Config.SetValue("ResidentalTimer", residentalTimer);
-            }
-            Config.SetValue("TavernMinOccupation", TavernMinOccupation.Text.Trim());
-
-            Config.SetValue("AutoLoginAfterStart", AutoLoginCheck.IsChecked.Value.ToString());
+            ConfigProvider.Save(ConfigPath);
         }
 
-        private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
-        {
-            UpdateUserInterval();
-        }
 
         private void AutoLoginCheck_OnClick(object sender, RoutedEventArgs e)
         {
@@ -636,6 +542,11 @@ namespace FoE.Farmer.Library.Windows
 
         public void Close()
         {
+            Browser?.CloseDevTools();
+            Manager.SaveCache();
+            SaveConfig();
+            if (File.Exists(Path.Combine(TempFolder, "OtherResources.html"))) File.Delete(Path.Combine(TempFolder, "OtherResources.html"));
+
             otherBrowser?.Dispose();
             Browser?.Dispose();
         }
@@ -644,5 +555,6 @@ namespace FoE.Farmer.Library.Windows
         {
             Close();
         }
+
     }
 }
